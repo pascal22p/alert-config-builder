@@ -16,15 +16,22 @@
 
 package uk.gov.hmrc.alertconfig.builders
 
+import java.io.{File, FileInputStream, FileNotFoundException}
+import java.util
+
+import org.yaml.snakeyaml.Yaml
 import spray.json.DefaultJsonProtocol._
+import uk.gov.hmrc.alertconfig.logging.Logger
 
 trait Builder[T] {
   def build: T
 }
 
-case class AlertConfigBuilder(serviceName: String, handlers: Seq[String] = Seq("noop"), exceptionThreshold: Int = 2, http5xxThreshold: Int = 2, http5xxPercentThreshold: Double = 100) extends Builder[String]{
+case class AlertConfigBuilder(serviceName: String, handlers: Seq[String] = Seq("noop"), exceptionThreshold: Int = 2, http5xxThreshold: Int = 2, http5xxPercentThreshold: Double = 100) extends Builder[Option[String]]{
 
   import spray.json._
+
+  val logger = new Logger()
 
   def withHandlers(handlers: String*) = this.copy(handlers = handlers)
 
@@ -34,10 +41,41 @@ case class AlertConfigBuilder(serviceName: String, handlers: Seq[String] = Seq("
 
   def withHttp5xxPercentThreshold(http5xxPercentThreshold: Int) = this.copy(http5xxPercentThreshold = http5xxPercentThreshold)
 
-  def build: String =
-  s"""
-     |{\"app\": \"${serviceName}.service\",\"handlers\": ${handlers.toJson.compactPrint}, \"exception-threshold\":${exceptionThreshold}, \"5xx-threshold\":${http5xxThreshold}, \"5xx-percent-threshold\":${http5xxPercentThreshold}}
-    """.stripMargin
+  def build: Option[String] = {
+    val appConfigPath = System.getProperty("app-config-path", "../app-config")
+    val appConfigDirectory = new File(appConfigPath)
+    if(!appConfigDirectory.exists()) {
+      throw new FileNotFoundException(s"Could not find app-config repository: ${appConfigPath}")
+    }
+
+    val appConfigFile = new File(appConfigDirectory, s"${serviceName}.yaml")
+    if(!appConfigFile.exists()) {
+      logger.info(s"No app-config file found for service: '${serviceName}'. File was expected at: '${appConfigFile.getAbsolutePath}'")
+      return None
+    }
+
+    val serviceDomain = getServiceDomain(appConfigFile)
+    if(serviceDomain.isEmpty) {
+      logger.warn(s"app-config file for service: '${serviceName}' does not contain 'zone' key.")
+      return None
+    }
+
+    Some(s"""
+       |{\"app\": \"${serviceName}.${serviceDomain.get}\",\"handlers\": ${handlers.toJson.compactPrint}, \"exception-threshold\":${exceptionThreshold}, \"5xx-threshold\":${http5xxThreshold}, \"5xx-percent-threshold\":${http5xxPercentThreshold}}
+    """.stripMargin)
+  }
+
+  def getServiceDomain(appConfigFile: File): Option[String] = {
+
+    import scala.collection.JavaConversions._
+
+    val appConfig: util.Map[String, util.Map[String, String]] = new Yaml()
+      .load(new FileInputStream(appConfigFile))
+      .asInstanceOf[java.util.Map[String, java.util.Map[String, String]]]
+    val versionObject: Map[String, String] = appConfig.toMap.mapValues(_.toMap)("0.0.0")
+
+    return versionObject.get("zone")
+  }
 
 }
 
