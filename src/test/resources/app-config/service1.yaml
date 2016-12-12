@@ -1,0 +1,40 @@
+0.0.0:  # Config version, not yet used, don't change unless you really know what you're doing
+  # used to merge the relevant shared conf while deployment (values accepted microservice, frontend and monolith)
+  type: microservice
+
+  #
+  # Endpoint that provides a basic health check for the app
+  # healthy = HTTP 200 response with some data
+  #
+  healthcheck:
+    endpoint: /ping/ping
+
+  #
+  # number of instances (containers) of the microservice to start
+  # This should be N+1, where ideally N is determined by performance tests
+  #
+  instances: 2
+
+  #
+  # Slots - memory allowance for a container
+  # 1 slot = 128MB of ram
+  # http://goo.gl/Kx0nVy
+  #
+  slots: 4
+
+  #
+  # extra environment variables passed to the container
+  # We use that mostly for microservices that are not java based, but it
+  # can be used for java apps as well
+  #
+  #environment:
+
+  #
+  # Xms and Xms settings - should be 50% less than slots
+  # Warning: don't change these before reading http://goo.gl/Kx0nVy
+  #
+  jvm:
+    mx: 256m
+    ms: 256m
+
+  zone: example.zone

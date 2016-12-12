@@ -3,10 +3,16 @@
 
 [![Build Status](https://travis-ci.org/hmrc/alert-config-builder.svg?branch=master)](https://travis-ci.org/hmrc/alert-config-builder) [ ![Download](https://api.bintray.com/packages/hmrc/releases/alert-config-builder/images/download.svg) ](https://bintray.com/hmrc/releases/alert-config-builder/_latestVersion)
 
-This is a placeholder README.md for a new repository
+`alert-config-builder` is a Scala utility which, given an alert specification for a number of services, generates and emits JSON alert configuration documents for those services, suitable for indexing in Elasticsearch.
+
+# Dependencies
+
+Depends on the `app-config` Git repository for the environment for which the alert config is being generated e.g. [app-config-qa](https://github.tools.tax.service.gov.uk/HMRC/app-config-qa/).
+
+# Parameters
+
+`app-config-path` - A Java system property which identifies the location of the app-config repository to use in the generation of the alert-config. This can be either a relative or absolute path. If not provided this will default to `../app-config`.
 
 ### License
 
-
 This code is open source software licensed under the [Apache 2.0 License]("http://www.apache.org/licenses/LICENSE-2.0.html").
-    

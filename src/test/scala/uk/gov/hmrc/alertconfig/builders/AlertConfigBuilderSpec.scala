@@ -16,21 +16,44 @@
 
 package uk.gov.hmrc.alertconfig.builders
 
-import org.scalatest.{Matchers, WordSpec}
+import java.io.FileNotFoundException
+
+import org.scalatest.{Assertions, BeforeAndAfterEach, Matchers, WordSpec}
 import spray.json._
 
-class AlertConfigBuilderSpec extends WordSpec with Matchers {
+class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterEach {
+
+  override def beforeEach() {
+    System.setProperty("app-config-path", "src/test/resources/app-config")
+  }
+
   "AlertConfigBuilder" should {
     "build correct config" in  {
 
-      val config = AlertConfigBuilder("service1", handlers = Seq("h1","h2")).build.parseJson.asJsObject.fields
+      val config = AlertConfigBuilder("service1", handlers = Seq("h1","h2")).build.get.parseJson.asJsObject.fields
 
-      config("app") shouldBe JsString("service1.service")
+      config("app") shouldBe JsString("service1.example.zone")
       config("handlers") shouldBe JsArray(JsString("h1"), JsString("h2"))
       config("exception-threshold") shouldBe JsNumber(2)
       config("5xx-threshold") shouldBe JsNumber(2)
       config("5xx-percent-threshold") shouldBe JsNumber(100)
 
+    }
+
+    "throw exception and stop processing when app config directory not found" in {
+      System.setProperty("app-config-path", "this-directory-does-not-exist")
+
+      intercept[FileNotFoundException] {
+        val config = AlertConfigBuilder("service1", handlers = Seq("h1","h2")).build.get.parseJson.asJsObject.fields
+      }
+    }
+
+    "Returns None when app config file not found" in {
+        AlertConfigBuilder("absent-service", handlers = Seq("h1","h2")).build shouldBe None
+    }
+
+    "Returns None when app config file exists but zone key is absent" in {
+      AlertConfigBuilder("service-with-absent-zone-key", handlers = Seq("h1","h2")).build shouldBe None
     }
   }
 
