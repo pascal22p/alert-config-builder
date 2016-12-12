@@ -23,6 +23,8 @@ import org.yaml.snakeyaml.Yaml
 import spray.json.DefaultJsonProtocol._
 import uk.gov.hmrc.alertconfig.logging.Logger
 
+import scala.collection.JavaConversions.mapAsScalaMap
+
 trait Builder[T] {
   def build: T
 }
@@ -60,21 +62,22 @@ case class AlertConfigBuilder(serviceName: String, handlers: Seq[String] = Seq("
       return None
     }
 
+    val mappedServiceDomain = ZoneToServiceDomainMapper.getServiceDomain(serviceDomain)
+    if(mappedServiceDomain.isEmpty) {
+      return None
+    }
+
     Some(s"""
-       |{\"app\": \"${serviceName}.${serviceDomain.get}\",\"handlers\": ${handlers.toJson.compactPrint}, \"exception-threshold\":${exceptionThreshold}, \"5xx-threshold\":${http5xxThreshold}, \"5xx-percent-threshold\":${http5xxPercentThreshold}}
+       |{\"app\": \"${serviceName}.${mappedServiceDomain.get}\",\"handlers\": ${handlers.toJson.compactPrint}, \"exception-threshold\":${exceptionThreshold}, \"5xx-threshold\":${http5xxThreshold}, \"5xx-percent-threshold\":${http5xxPercentThreshold}}
     """.stripMargin)
   }
 
   def getServiceDomain(appConfigFile: File): Option[String] = {
-
-    import scala.collection.JavaConversions._
-
     val appConfig: util.Map[String, util.Map[String, String]] = new Yaml()
-      .load(new FileInputStream(appConfigFile))
-      .asInstanceOf[java.util.Map[String, java.util.Map[String, String]]]
+      .load(new FileInputStream(appConfigFile)).asInstanceOf[java.util.Map[String, java.util.Map[String, String]]]
     val versionObject: Map[String, String] = appConfig.toMap.mapValues(_.toMap)("0.0.0")
 
-    return versionObject.get("zone")
+    versionObject.get("zone")
   }
 
 }
@@ -101,4 +104,29 @@ object TeamAlertConfigBuilder {
     TeamAlertConfigBuilder(services)
   }
 
+}
+
+object ZoneToServiceDomainMapper {
+  val logger = new Logger()
+  val zoneToServiceMappingFilePath = System.getProperty("zone-mapping-path", "zone-to-service-domain-mapping.yml")
+  val zoneToServiceMappingFile = new File(zoneToServiceMappingFilePath)
+  if(!zoneToServiceMappingFile.exists()) {
+    throw new FileNotFoundException(s"Could not find zone to service domain mapping file: ${zoneToServiceMappingFilePath}")
+  }
+  val zoneToServiceDomainMappings: Map[String, String] = mapAsScalaMap[String, String](
+    new Yaml().load(new FileInputStream(zoneToServiceMappingFile)).asInstanceOf[java.util.Map[String, String]])
+      .toMap
+
+  def getServiceDomain(zone: Option[String]): Option[String] = {
+    zone match {
+      case Some(_: String) => {
+        val mappedServiceDomain = zoneToServiceDomainMappings.get(zone.get)
+        if(mappedServiceDomain.isEmpty) {
+          logger.error(s"Zone to service domain mapping file '${zoneToServiceMappingFile.getAbsolutePath}' does not contain mapping for zone '${zone.get}'")
+        }
+        mappedServiceDomain
+      }
+      case _ => zone
+    }
+  }
 }

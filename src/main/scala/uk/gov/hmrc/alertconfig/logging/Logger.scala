@@ -21,5 +21,7 @@ class Logger {
 
   def debug(st: String) = println("[DEBUG] " + st)
 
+  def error(st: String) = println("[ERROR] " + st)
+
   def warn(st: String) = println("[WARN] " + st)
 }
