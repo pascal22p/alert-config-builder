@@ -5,6 +5,8 @@
 
 `alert-config-builder` is a Scala utility which, given an alert specification for a number of services, generates and emits JSON alert configuration documents for those services, suitable for indexing in Elasticsearch.
 
+The artifact produced by this project is used in the [alert-config](https://github.tools.tax.service.gov.uk/hmrc/alert-config) project. The 2 repositories kept separate due to the fact that the `alert-config` project is user editable but yet we don't want to make the functionality exposed here available to teams to modify, hence it is pulled in as a jar dependency which is of course immutable.
+
 # Dependencies
 
 Depends on the `app-config` Git repository for the environment for which the alert config is being generated e.g. [app-config-qa](https://github.tools.tax.service.gov.uk/HMRC/app-config-qa/).
