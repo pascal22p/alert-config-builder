@@ -46,36 +46,37 @@ case class AlertConfigBuilder(serviceName: String, handlers: Seq[String] = Seq("
   def build: Option[String] = {
     val appConfigPath = System.getProperty("app-config-path", "../app-config")
     val appConfigDirectory = new File(appConfigPath)
-    if(!appConfigDirectory.exists()) {
-      throw new FileNotFoundException(s"Could not find app-config repository: ${appConfigPath}")
+    val appConfigFile = new File(appConfigDirectory, s"$serviceName.yaml")
+
+    if (!appConfigDirectory.exists) {
+      throw new FileNotFoundException(s"Could not find app-config repository: $appConfigPath")
     }
 
-    val appConfigFile = new File(appConfigDirectory, s"${serviceName}.yaml")
-    if(!appConfigFile.exists()) {
-      logger.info(s"No app-config file found for service: '${serviceName}'. File was expected at: '${appConfigFile.getAbsolutePath}'")
-      return None
-    }
+    appConfigFile match {
+      case file if !file.exists =>
+        logger.info(s"No app-config file found for service: '$serviceName'. File was expected at: '${file.getAbsolutePath}'")
+        None
+      case file if getZone(file).isEmpty =>
+        logger.warn(s"app-config file for service: '$serviceName' does not contain 'zone' key.")
+        None
+      case file =>
+        val serviceDomain = getZone(file)
 
-    val serviceDomain = getServiceDomain(appConfigFile)
-    if(serviceDomain.isEmpty) {
-      logger.warn(s"app-config file for service: '${serviceName}' does not contain 'zone' key.")
-      return None
+        ZoneToServiceDomainMapper.getServiceDomain(serviceDomain).map(serviceDomain =>
+          s"""
+             |{\"app\": \"$serviceName.$serviceDomain\",\"handlers\": ${handlers.toJson.compactPrint}, \"exception-threshold\":$exceptionThreshold, \"5xx-threshold\":$http5xxThreshold, \"5xx-percent-threshold\":$http5xxPercentThreshold}
+          """.stripMargin
+        )
     }
-
-    val mappedServiceDomain = ZoneToServiceDomainMapper.getServiceDomain(serviceDomain)
-    if(mappedServiceDomain.isEmpty) {
-      return None
-    }
-
-    Some(s"""
-       |{\"app\": \"${serviceName}.${mappedServiceDomain.get}\",\"handlers\": ${handlers.toJson.compactPrint}, \"exception-threshold\":${exceptionThreshold}, \"5xx-threshold\":${http5xxThreshold}, \"5xx-percent-threshold\":${http5xxPercentThreshold}}
-    """.stripMargin)
   }
 
-  def getServiceDomain(appConfigFile: File): Option[String] = {
-    val appConfig: util.Map[String, util.Map[String, String]] = new Yaml()
-      .load(new FileInputStream(appConfigFile)).asInstanceOf[java.util.Map[String, java.util.Map[String, String]]]
-    val versionObject: Map[String, String] = appConfig.toMap.mapValues(_.toMap)("0.0.0")
+  def getZone(appConfigFile: File): Option[String] = {
+    val appConfig =
+      new Yaml()
+        .load(new FileInputStream(appConfigFile))
+        .asInstanceOf[java.util.Map[String, java.util.Map[String, String]]]
+
+    val versionObject = appConfig.toMap.mapValues(_.toMap)("0.0.0")
 
     versionObject.get("zone")
   }
