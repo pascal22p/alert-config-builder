@@ -57,6 +57,10 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
       AlertConfigBuilder("service-with-absent-zone-key", handlers = Seq("h1","h2")).build shouldBe None
     }
 
+    "Returns None when app config file exists but it unparsable" in {
+      AlertConfigBuilder("service-with-unparseable-app-config", handlers = Seq("h1","h2")).build shouldBe None
+    }
+
     "Maps the correct service domain" in {
       val service2Config = AlertConfigBuilder("service2", handlers = Seq("h1","h2")).build.get.parseJson.asJsObject.fields
       val service3Config = AlertConfigBuilder("service3", handlers = Seq("h1","h2")).build.get.parseJson.asJsObject.fields

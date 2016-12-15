@@ -17,13 +17,13 @@
 package uk.gov.hmrc.alertconfig.builders
 
 import java.io.{File, FileInputStream, FileNotFoundException}
-import java.util
 
 import org.yaml.snakeyaml.Yaml
 import spray.json.DefaultJsonProtocol._
 import uk.gov.hmrc.alertconfig.logging.Logger
 
 import scala.collection.JavaConversions.mapAsScalaMap
+import scala.util.{Failure, Success, Try}
 
 trait Builder[T] {
   def build: T
@@ -46,7 +46,7 @@ case class AlertConfigBuilder(serviceName: String, handlers: Seq[String] = Seq("
   def build: Option[String] = {
     val appConfigPath = System.getProperty("app-config-path", "../app-config")
     val appConfigDirectory = new File(appConfigPath)
-    val appConfigFile = new File(appConfigDirectory, s"$serviceName.yaml")
+    val appConfigFile = new File(appConfigDirectory, s"${serviceName}.yaml")
 
     if (!appConfigDirectory.exists) {
       throw new FileNotFoundException(s"Could not find app-config repository: $appConfigPath")
@@ -54,10 +54,10 @@ case class AlertConfigBuilder(serviceName: String, handlers: Seq[String] = Seq("
 
     appConfigFile match {
       case file if !file.exists =>
-        logger.info(s"No app-config file found for service: '$serviceName'. File was expected at: '${file.getAbsolutePath}'")
+        logger.info(s"No app-config file found for service: '${serviceName}'. File was expected at: '${file.getAbsolutePath}'")
         None
       case file if getZone(file).isEmpty =>
-        logger.warn(s"app-config file for service: '$serviceName' does not contain 'zone' key.")
+        logger.warn(s"app-config file for service: '${serviceName}' does not contain 'zone' key.")
         None
       case file =>
         val serviceDomain = getZone(file)
@@ -71,16 +71,22 @@ case class AlertConfigBuilder(serviceName: String, handlers: Seq[String] = Seq("
   }
 
   def getZone(appConfigFile: File): Option[String] = {
-    val appConfig =
-      new Yaml()
-        .load(new FileInputStream(appConfigFile))
-        .asInstanceOf[java.util.Map[String, java.util.Map[String, String]]]
+    def parseAppConfigFile: Try[Object] = {
+      Try(new Yaml().load(new FileInputStream(appConfigFile)))
+    }
 
-    val versionObject = appConfig.toMap.mapValues(_.toMap)("0.0.0")
-
-    versionObject.get("zone")
+    parseAppConfigFile match {
+      case Failure(exception) => {
+        logger.warn(s"app-config file ${appConfigFile} for service: '${serviceName}' is not valid YAML and could not be parsed. Parsing Exception: ${exception.getMessage}")
+        None
+      }
+      case Success(appConfigYamlMap) => {
+        val appConfig = appConfigYamlMap.asInstanceOf[java.util.Map[String, java.util.Map[String, String]]]
+        val versionObject = appConfig.toMap.mapValues(_.toMap)("0.0.0")
+        versionObject.get("zone")
+      }
+    }
   }
-
 }
 
 case class TeamAlertConfigBuilder(services: Seq[String], handlers: Seq[String] = Seq("noop"), exceptionThreshold: Int = 2, http5xxThreshold: Int = 2, http5xxPercentThreshold: Double = 100) extends Builder[Seq[AlertConfigBuilder]] {
