@@ -31,13 +31,14 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
   "AlertConfigBuilder" should {
     "build correct config" in  {
 
-      val config = AlertConfigBuilder("service1", handlers = Seq("h1","h2")).build.get.parseJson.asJsObject.fields
+      val config = AlertConfigBuilder("service1", handlers = Seq("h1","h2")).withContainerCrashThreshold(56).build.get.parseJson.asJsObject.fields
 
       config("app") shouldBe JsString("service1.domain.zone.1")
       config("handlers") shouldBe JsArray(JsString("h1"), JsString("h2"))
       config("exception-threshold") shouldBe JsNumber(2)
       config("5xx-threshold") shouldBe JsNumber(2)
       config("5xx-percent-threshold") shouldBe JsNumber(100)
+      config("containerCrashThreshold") shouldBe JsNumber(56)
 
     }
 
