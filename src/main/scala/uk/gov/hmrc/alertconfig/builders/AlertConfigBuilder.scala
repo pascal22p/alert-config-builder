@@ -29,7 +29,7 @@ trait Builder[T] {
   def build: T
 }
 
-case class AlertConfigBuilder(serviceName: String, handlers: Seq[String] = Seq("noop"), exceptionThreshold: Int = 2, http5xxThreshold: Int = 2, http5xxPercentThreshold: Double = 100, containerCrashThreshold : Int = 2) extends Builder[Option[String]]{
+case class AlertConfigBuilder(serviceName: String, handlers: Seq[String] = Seq("noop"), exceptionThreshold: Int = 2, http5xxThreshold: Int = 2, http5xxPercentThreshold: Double = 100, containerKillThreshold : Int = 2) extends Builder[Option[String]]{
 
   import spray.json._
 
@@ -43,7 +43,7 @@ case class AlertConfigBuilder(serviceName: String, handlers: Seq[String] = Seq("
 
   def withHttp5xxPercentThreshold(http5xxPercentThreshold: Int) = this.copy(http5xxPercentThreshold = http5xxPercentThreshold)
 
-  def withContainerCrashThreshold(containerCrashThreshold : Int) = this.copy(containerCrashThreshold = containerCrashThreshold)
+  def withContainerKillThreshold(containerCrashThreshold : Int) = this.copy(containerKillThreshold = containerCrashThreshold)
 
   def build: Option[String] = {
     val appConfigPath = System.getProperty("app-config-path", "../app-config")
@@ -66,7 +66,7 @@ case class AlertConfigBuilder(serviceName: String, handlers: Seq[String] = Seq("
 
         ZoneToServiceDomainMapper.getServiceDomain(serviceDomain).map(serviceDomain =>
           s"""
-             |{\"app\": \"$serviceName.$serviceDomain\",\"handlers\": ${handlers.toJson.compactPrint}, \"exception-threshold\":$exceptionThreshold, \"5xx-threshold\":$http5xxThreshold, \"5xx-percent-threshold\":$http5xxPercentThreshold, \"containerCrashThreshold\" : $containerCrashThreshold}
+             |{\"app\": \"$serviceName.$serviceDomain\",\"handlers\": ${handlers.toJson.compactPrint}, \"exception-threshold\":$exceptionThreshold, \"5xx-threshold\":$http5xxThreshold, \"5xx-percent-threshold\":$http5xxPercentThreshold, \"containerKillThreshold\" : $containerKillThreshold}
           """.stripMargin
         )
     }
