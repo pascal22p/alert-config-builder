@@ -85,13 +85,11 @@ case class AlertConfigBuilder(serviceName: String,
   }
 
   def buildHttpStatusThresholds = {
-//    val map = httpStatusThresholds.map(t => Seq("httpStatus" -> t.httpStatus, "count" -> t.count, "timeWindow" -> t.timeWindowMins).toMap)
-
 
     import uk.gov.hmrc.alertconfig.HttpStatusThresholdProtocol._
-    val map = httpStatusThresholds.map(t => t.toJson.compactPrint).mkString(",")
+    val thresholdsAsJson = httpStatusThresholds.map(t => t.toJson.compactPrint).mkString(",")
 
-    s"""[${map}]"""
+    s"""[${thresholdsAsJson}]"""
   }
 
 
