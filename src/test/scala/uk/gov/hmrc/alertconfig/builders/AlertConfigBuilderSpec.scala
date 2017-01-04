@@ -71,6 +71,7 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
       service3Config("app") shouldBe JsString("service3.domain.zone.3")
     }
 
+    // Ignored as it cannot be run as part of the entire suite due to the system property setting.
     "throw exception and stop processing when zone to service domain mapping file not found" ignore {
       System.setProperty("zone-mapping-path", "this-file-does-not-exist")
 

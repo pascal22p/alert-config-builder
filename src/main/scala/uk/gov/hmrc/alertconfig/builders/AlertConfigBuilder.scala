@@ -36,7 +36,7 @@ case class AlertConfigBuilder(serviceName: String,
                               exceptionThreshold: Int = 2,
                               http5xxThreshold: Int = 2,
                               http5xxPercentThreshold: Double = 100,
-                              containerKillThreshold : Int = 2,
+                              containerKillThreshold : Int = 1,
                               httpStatusThresholds: Seq[HttpStatusThreshold] = Nil) extends Builder[Option[String]]{
 
   import spray.json._
@@ -125,6 +125,7 @@ case class TeamAlertConfigBuilder(services: Seq[String],
   def withHttp5xxThreshold(http5xxThreshold: Int) = this.copy(http5xxThreshold = http5xxThreshold)
 
   def withHttp5xxPercentThreshold(percentThreshold: Double) = this.copy(http5xxPercentThreshold = percentThreshold)
+
   def withContainerKillThreshold(containerKillThreshold: Int) = this.copy(containerKillThreshold = containerKillThreshold)
 
   def withHttpStatusThreshold(threshold: HttpStatusThreshold) = this.copy(httpStatusThresholds = httpStatusThresholds :+ threshold)
