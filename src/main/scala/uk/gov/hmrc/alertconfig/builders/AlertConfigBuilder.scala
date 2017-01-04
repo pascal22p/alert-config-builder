@@ -112,7 +112,13 @@ case class AlertConfigBuilder(serviceName: String,
   }
 }
 
-case class TeamAlertConfigBuilder(services: Seq[String], handlers: Seq[String] = Seq("noop"), exceptionThreshold: Int = 2, http5xxThreshold: Int = 2, http5xxPercentThreshold: Double = 100, containerKillThreshold : Int = 2) extends Builder[Seq[AlertConfigBuilder]] {
+case class TeamAlertConfigBuilder(services: Seq[String],
+                                  handlers: Seq[String] = Seq("noop"),
+                                  exceptionThreshold: Int = 2,
+                                  http5xxThreshold: Int = 2,
+                                  http5xxPercentThreshold: Double = 100,
+                                  containerKillThreshold : Int = 2,
+                                  httpStatusThresholds: Seq[HttpStatusThreshold] = Nil) extends Builder[Seq[AlertConfigBuilder]] {
 
   def withHandlers(handlers: String*) = this.copy(handlers = handlers)
 
@@ -122,6 +128,8 @@ case class TeamAlertConfigBuilder(services: Seq[String], handlers: Seq[String] =
 
   def withHttp5xxPercentThreshold(percentThreshold: Double) = this.copy(http5xxPercentThreshold = percentThreshold)
   def withContainerKillThreshold(containerKillThreshold: Int) = this.copy(containerKillThreshold = containerKillThreshold)
+
+  def withHttpStatusThreshold(threshold: HttpStatusThreshold) = this.copy(httpStatusThresholds = httpStatusThresholds :+ threshold)
 
   override def build: Seq[AlertConfigBuilder] = services.map(service =>
     AlertConfigBuilder(service, handlers, exceptionThreshold, http5xxThreshold, http5xxPercentThreshold, containerKillThreshold)
