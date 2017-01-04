@@ -16,26 +16,10 @@
 
 package uk.gov.hmrc.alertconfig
 
-import org.scalatest.{Matchers, WordSpec}
+import spray.json.DefaultJsonProtocol
 
+case class HttpStatusThreshold(httpStatus: Int, count: Int = 1)
 
-trait SuperType
-
-case object A extends SuperType
-
-object B extends SuperType
-
-object C
-
-class ObjectScannerSpec extends WordSpec with Matchers {
-
-  "ClassScanner" should {
-    "load all the singleton subtypes of a type in given package" in {
-
-      ObjectScanner.loadAll[SuperType](this.getClass.getPackage.getName) should contain only(A, B)
-
-    }
-
-  }
-
+object HttpStatusThresholdProtocol extends DefaultJsonProtocol {
+  implicit val colorFormat = jsonFormat2(HttpStatusThreshold)
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import java.io.FileNotFoundException
 
 import org.scalatest._
 import spray.json._
+import uk.gov.hmrc.alertconfig.HttpStatusThreshold
 
 class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterEach {
 
@@ -78,6 +79,27 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
         c.newInstance()
       }
       assert(exception.getCause.isInstanceOf[FileNotFoundException])
+    }
+
+    "build/configure http status threshold with given thresholds" in {
+
+      val serviceConfig = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))
+        .withHttpStatusThreshold(HttpStatusThreshold(502, 2))
+        .withHttpStatusThreshold(HttpStatusThreshold(503, 3))
+        .withHttpStatusThreshold(HttpStatusThreshold(504, 4)).build.get.parseJson.asJsObject.fields
+
+      serviceConfig("httpStatusThresholds") shouldBe JsArray(
+        JsObject("httpStatus" -> JsNumber(502),"count" ->  JsNumber(2)),
+        JsObject("httpStatus" -> JsNumber(503),"count" ->  JsNumber(3)),
+        JsObject("httpStatus" -> JsNumber(504),"count" ->  JsNumber(4))
+      )
+    }
+
+    "build/configure any empty http status threshold" in {
+
+      val serviceConfig = AlertConfigBuilder("service1").build.get.parseJson.asJsObject.fields
+
+      serviceConfig("httpStatusThresholds") shouldBe JsArray()
     }
   }
 }

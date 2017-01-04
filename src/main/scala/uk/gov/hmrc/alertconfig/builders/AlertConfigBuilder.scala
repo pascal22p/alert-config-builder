@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,16 +20,24 @@ import java.io.{File, FileInputStream, FileNotFoundException}
 
 import org.yaml.snakeyaml.Yaml
 import spray.json.DefaultJsonProtocol._
+import uk.gov.hmrc.alertconfig.HttpStatusThreshold
 import uk.gov.hmrc.alertconfig.logging.Logger
 
 import scala.collection.JavaConversions.mapAsScalaMap
+
 import scala.util.{Failure, Success, Try}
 
 trait Builder[T] {
   def build: T
 }
 
-case class AlertConfigBuilder(serviceName: String, handlers: Seq[String] = Seq("noop"), exceptionThreshold: Int = 2, http5xxThreshold: Int = 2, http5xxPercentThreshold: Double = 100, containerKillThreshold : Int = 2) extends Builder[Option[String]]{
+case class AlertConfigBuilder(serviceName: String,
+                              handlers: Seq[String] = Seq("noop"),
+                              exceptionThreshold: Int = 2,
+                              http5xxThreshold: Int = 2,
+                              http5xxPercentThreshold: Double = 100,
+                              containerKillThreshold : Int = 2,
+                              httpStatusThresholds: Seq[HttpStatusThreshold] = Nil) extends Builder[Option[String]]{
 
   import spray.json._
 
@@ -43,7 +51,11 @@ case class AlertConfigBuilder(serviceName: String, handlers: Seq[String] = Seq("
 
   def withHttp5xxPercentThreshold(http5xxPercentThreshold: Int) = this.copy(http5xxPercentThreshold = http5xxPercentThreshold)
 
+  def withHttpStatusThreshold(threshold: HttpStatusThreshold) = this.copy(httpStatusThresholds = httpStatusThresholds :+ threshold)
+
   def withContainerKillThreshold(containerCrashThreshold : Int) = this.copy(containerKillThreshold = containerCrashThreshold)
+
+
 
   def build: Option[String] = {
     val appConfigPath = System.getProperty("app-config-path", "../app-config")
@@ -66,11 +78,20 @@ case class AlertConfigBuilder(serviceName: String, handlers: Seq[String] = Seq("
 
         ZoneToServiceDomainMapper.getServiceDomain(serviceDomain).map(serviceDomain =>
           s"""
-             |{\"app\": \"$serviceName.$serviceDomain\",\"handlers\": ${handlers.toJson.compactPrint}, \"exception-threshold\":$exceptionThreshold, \"5xx-threshold\":$http5xxThreshold, \"5xx-percent-threshold\":$http5xxPercentThreshold, \"containerKillThreshold\" : $containerKillThreshold}
+             |{\"app\": \"$serviceName.$serviceDomain\",\"handlers\": ${handlers.toJson.compactPrint}, \"exception-threshold\":$exceptionThreshold, \"5xx-threshold\":$http5xxThreshold, \"5xx-percent-threshold\":$http5xxPercentThreshold, \"containerKillThreshold\" : $containerKillThreshold, \"httpStatusThresholds\" : $buildHttpStatusThresholds}
           """.stripMargin
         )
     }
   }
+
+  def buildHttpStatusThresholds = {
+
+    import uk.gov.hmrc.alertconfig.HttpStatusThresholdProtocol._
+    val thresholdsAsJson = httpStatusThresholds.map(t => t.toJson.compactPrint).mkString(",")
+
+    s"""[${thresholdsAsJson}]"""
+  }
+
 
   def getZone(appConfigFile: File): Option[String] = {
     def parseAppConfigFile: Try[Object] = {
