@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 HM Revenue & Customs
+ * Copyright 2017 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -84,14 +84,14 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
     "build/configure http status threshold with given thresholds" in {
 
       val serviceConfig = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))
-        .withHttpStatusThreshold(HttpStatusThreshold(502, 2, 22))
-        .withHttpStatusThreshold(HttpStatusThreshold(503, 3, 33))
-        .withHttpStatusThreshold(HttpStatusThreshold(504, 4, 44)).build.get.parseJson.asJsObject.fields
+        .withHttpStatusThreshold(HttpStatusThreshold(502, 2))
+        .withHttpStatusThreshold(HttpStatusThreshold(503, 3))
+        .withHttpStatusThreshold(HttpStatusThreshold(504, 4)).build.get.parseJson.asJsObject.fields
 
       serviceConfig("httpStatusThresholds") shouldBe JsArray(
-        JsObject("httpStatus" -> JsNumber(502),"count" ->  JsNumber(2), "timeWindowMins" -> JsNumber(22)),
-        JsObject("httpStatus" -> JsNumber(503),"count" ->  JsNumber(3), "timeWindowMins" -> JsNumber(33)),
-        JsObject("httpStatus" -> JsNumber(504),"count" ->  JsNumber(4), "timeWindowMins" -> JsNumber(44))
+        JsObject("httpStatus" -> JsNumber(502),"count" ->  JsNumber(2)),
+        JsObject("httpStatus" -> JsNumber(503),"count" ->  JsNumber(3)),
+        JsObject("httpStatus" -> JsNumber(504),"count" ->  JsNumber(4))
       )
     }
 
