@@ -16,9 +16,18 @@
 
 package uk.gov.hmrc.alertconfig.builders
 
-import org.scalatest.{Matchers, WordSpec}
+import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpec}
+import spray.json.{JsArray, JsString}
+import uk.gov.hmrc.alertconfig.HttpStatusThreshold
+import spray.json._
 
-class TeamAlertConfigBuilderSpec extends WordSpec with Matchers {
+
+class TeamAlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterEach {
+
+  override def beforeEach() {
+    System.setProperty("app-config-path", "src/test/resources/app-config")
+    System.setProperty("zone-mapping-path", "src/test/resources/zone-to-service-domain-mapping.yml")
+  }
 
   "teamAlerts" should {
     "return TeamAlertConfigBuilder with correct default values" in {
@@ -30,6 +39,41 @@ class TeamAlertConfigBuilderSpec extends WordSpec with Matchers {
       alertConfigBuilder.http5xxPercentThreshold shouldBe 100
       alertConfigBuilder.http5xxThreshold shouldBe 2
       alertConfigBuilder.exceptionThreshold shouldBe 2
+    }
+
+
+    "return TeamAlertConfigBuilder with correct httpStatusThresholds" in {
+
+      val threshold1 = HttpStatusThreshold(500, 19)
+      val threshold2 = HttpStatusThreshold(501, 20)
+      val alertConfigBuilder = TeamAlertConfigBuilder.teamAlerts(Seq("service1", "service2"))
+        .withHttpStatusThreshold(threshold1)
+        .withHttpStatusThreshold(threshold2)
+
+
+      alertConfigBuilder.services shouldBe Seq("service1", "service2")
+      val configs = alertConfigBuilder.build.map(_.build.get.parseJson.asJsObject.fields)
+
+      configs.size shouldBe 2
+      val service1Config = configs(0)
+      val service2Config = configs(1)
+
+      service1Config("httpStatusThresholds") shouldBe
+        JsArray(
+          JsObject("httpStatus" -> JsNumber(500),
+            "count" -> JsNumber(19)),
+          JsObject("httpStatus" -> JsNumber(501),
+            "count" -> JsNumber(20))
+
+        )
+      service2Config("httpStatusThresholds") shouldBe
+        JsArray(
+          JsObject("httpStatus" -> JsNumber(500),
+            "count" -> JsNumber(19)),
+          JsObject("httpStatus" -> JsNumber(501),
+            "count" -> JsNumber(20))
+        )
+
     }
 
     "throw exception if no service provided" in {
