@@ -132,7 +132,7 @@ case class TeamAlertConfigBuilder(services: Seq[String],
   def withHttpStatusThreshold(threshold: HttpStatusThreshold) = this.copy(httpStatusThresholds = httpStatusThresholds :+ threshold)
 
   override def build: Seq[AlertConfigBuilder] = services.map(service =>
-    AlertConfigBuilder(service, handlers, exceptionThreshold, http5xxThreshold, http5xxPercentThreshold, containerKillThreshold)
+    AlertConfigBuilder(service, handlers, exceptionThreshold, http5xxThreshold, http5xxPercentThreshold, containerKillThreshold, httpStatusThresholds)
   )
 }
 
