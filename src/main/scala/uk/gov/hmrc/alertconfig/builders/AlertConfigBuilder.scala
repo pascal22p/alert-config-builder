@@ -55,8 +55,6 @@ case class AlertConfigBuilder(serviceName: String,
 
   def withContainerKillThreshold(containerCrashThreshold : Int) = this.copy(containerKillThreshold = containerCrashThreshold)
 
-
-
   def build: Option[String] = {
     val appConfigPath = System.getProperty("app-config-path", "../app-config")
     val appConfigDirectory = new File(appConfigPath)

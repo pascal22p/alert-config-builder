@@ -20,6 +20,7 @@ import java.io.FileNotFoundException
 
 import org.scalatest._
 import spray.json._
+import uk.gov.hmrc.alertconfig.HttpStatus._
 import uk.gov.hmrc.alertconfig.HttpStatusThreshold
 
 class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterEach {
@@ -84,9 +85,9 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
     "build/configure http status threshold with given thresholds" in {
 
       val serviceConfig = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))
-        .withHttpStatusThreshold(HttpStatusThreshold(502, 2))
-        .withHttpStatusThreshold(HttpStatusThreshold(503, 3))
-        .withHttpStatusThreshold(HttpStatusThreshold(504, 4)).build.get.parseJson.asJsObject.fields
+        .withHttpStatusThreshold(HttpStatusThreshold(HTTP_STATUS_502, 2))
+        .withHttpStatusThreshold(HttpStatusThreshold(HTTP_STATUS_503, 3))
+        .withHttpStatusThreshold(HttpStatusThreshold(HTTP_STATUS_504, 4)).build.get.parseJson.asJsObject.fields
 
       serviceConfig("httpStatusThresholds") shouldBe JsArray(
         JsObject("httpStatus" -> JsNumber(502),"count" ->  JsNumber(2)),
