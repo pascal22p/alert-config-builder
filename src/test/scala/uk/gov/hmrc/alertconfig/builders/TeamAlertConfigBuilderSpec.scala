@@ -42,7 +42,7 @@ class TeamAlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAf
     }
 
 
-    "return TeamAlertConfigBuilder with correct httpStatusThresholds" in {
+    "return TeamAlertConfigBuilder with correct httpStatusThresholds" ignore {
 
       val threshold1 = HttpStatusThreshold(HttpStatus.HTTP_STATUS_500, 19)
       val threshold2 = HttpStatusThreshold(HttpStatus.HTTP_STATUS_501, 20)

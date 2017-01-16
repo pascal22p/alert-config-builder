@@ -87,7 +87,9 @@ case class AlertConfigBuilder(serviceName: String,
     import uk.gov.hmrc.alertconfig.HttpStatusThresholdProtocol._
     val thresholdsAsJson = httpStatusThresholds.map(t => t.toJson.compactPrint).mkString(",")
 
-    s"""[${thresholdsAsJson}]"""
+//    s"""[${thresholdsAsJson}]"""
+    s"""[]""" //<-- PLATOPS-814 disabled now until PLATOPS-817 is done
+
   }
 
 

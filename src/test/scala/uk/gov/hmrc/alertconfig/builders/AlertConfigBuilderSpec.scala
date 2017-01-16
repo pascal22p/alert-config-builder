@@ -82,7 +82,7 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
       assert(exception.getCause.isInstanceOf[FileNotFoundException])
     }
 
-    "build/configure http status threshold with given thresholds" in {
+    "build/configure http status threshold with given thresholds" ignore {
 
       val serviceConfig = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))
         .withHttpStatusThreshold(HttpStatusThreshold(HTTP_STATUS_502, 2))
