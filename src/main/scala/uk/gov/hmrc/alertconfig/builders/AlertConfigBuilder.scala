@@ -115,7 +115,7 @@ case class TeamAlertConfigBuilder(services: Seq[String],
                                   exceptionThreshold: Int = 2,
                                   http5xxThreshold: Int = 2,
                                   http5xxPercentThreshold: Double = 100,
-                                  containerKillThreshold : Int = 2,
+                                  containerKillThreshold : Int = 1,
                                   httpStatusThresholds: Seq[HttpStatusThreshold] = Nil) extends Builder[Seq[AlertConfigBuilder]] {
 
   def withHandlers(handlers: String*) = this.copy(handlers = handlers)

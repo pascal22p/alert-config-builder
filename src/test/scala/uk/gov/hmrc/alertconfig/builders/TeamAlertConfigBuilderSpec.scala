@@ -39,6 +39,7 @@ class TeamAlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAf
       alertConfigBuilder.http5xxPercentThreshold shouldBe 100
       alertConfigBuilder.http5xxThreshold shouldBe 2
       alertConfigBuilder.exceptionThreshold shouldBe 2
+      alertConfigBuilder.containerKillThreshold shouldBe 1
     }
 
 
