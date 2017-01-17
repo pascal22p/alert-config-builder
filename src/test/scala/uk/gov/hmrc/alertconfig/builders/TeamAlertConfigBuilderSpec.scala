@@ -37,13 +37,13 @@ class TeamAlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAf
       alertConfigBuilder.services shouldBe Seq("service1", "service2")
       alertConfigBuilder.handlers shouldBe Seq("noop")
       alertConfigBuilder.http5xxPercentThreshold shouldBe 100
-      alertConfigBuilder.http5xxThreshold shouldBe 2
+      alertConfigBuilder.http5xxThreshold shouldBe Int.MaxValue
       alertConfigBuilder.exceptionThreshold shouldBe 2
       alertConfigBuilder.containerKillThreshold shouldBe 1
     }
 
 
-    "return TeamAlertConfigBuilder with correct httpStatusThresholds" ignore {
+    "return TeamAlertConfigBuilder with correct httpStatusThresholds" in {
 
       val threshold1 = HttpStatusThreshold(HttpStatus.HTTP_STATUS_500, 19)
       val threshold2 = HttpStatusThreshold(HttpStatus.HTTP_STATUS_501, 20)

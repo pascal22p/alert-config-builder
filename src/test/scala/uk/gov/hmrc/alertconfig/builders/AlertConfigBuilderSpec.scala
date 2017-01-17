@@ -38,7 +38,7 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
       config("app") shouldBe JsString("service1.domain.zone.1")
       config("handlers") shouldBe JsArray(JsString("h1"), JsString("h2"))
       config("exception-threshold") shouldBe JsNumber(2)
-      config("5xx-threshold") shouldBe JsNumber(2)
+      config("5xx-threshold") shouldBe JsNumber(Int.MaxValue)
       config("5xx-percent-threshold") shouldBe JsNumber(100)
       config("containerKillThreshold") shouldBe JsNumber(56)
 
@@ -83,7 +83,7 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
       assert(exception.getCause.isInstanceOf[FileNotFoundException])
     }
 
-    "build/configure http status threshold with given thresholds" ignore {
+    "build/configure http status threshold with given thresholds" in {
 
       val serviceConfig = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))
         .withHttpStatusThreshold(HttpStatusThreshold(HTTP_STATUS_502, 2))

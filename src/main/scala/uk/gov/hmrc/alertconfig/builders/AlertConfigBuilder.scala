@@ -34,7 +34,7 @@ trait Builder[T] {
 case class AlertConfigBuilder(serviceName: String,
                               handlers: Seq[String] = Seq("noop"),
                               exceptionThreshold: Int = 2,
-                              http5xxThreshold: Int = 2,
+                              http5xxThreshold: Int = Int.MaxValue,
                               http5xxPercentThreshold: Double = 100,
                               containerKillThreshold : Int = 1,
                               httpStatusThresholds: Seq[HttpStatusThreshold] = Nil) extends Builder[Option[String]]{
@@ -87,9 +87,7 @@ case class AlertConfigBuilder(serviceName: String,
     import uk.gov.hmrc.alertconfig.HttpStatusThresholdProtocol._
     val thresholdsAsJson = httpStatusThresholds.map(t => t.toJson.compactPrint).mkString(",")
 
-//    s"""[${thresholdsAsJson}]"""
-    s"""[]""" //<-- PLATOPS-814 disabled now until PLATOPS-817 is done
-
+    s"""[${thresholdsAsJson}]"""
   }
 
 
@@ -115,7 +113,7 @@ case class AlertConfigBuilder(serviceName: String,
 case class TeamAlertConfigBuilder(services: Seq[String],
                                   handlers: Seq[String] = Seq("noop"),
                                   exceptionThreshold: Int = 2,
-                                  http5xxThreshold: Int = 2,
+                                  http5xxThreshold: Int = Int.MaxValue,
                                   http5xxPercentThreshold: Double = 100,
                                   containerKillThreshold : Int = 1,
                                   httpStatusThresholds: Seq[HttpStatusThreshold] = Nil) extends Builder[Seq[AlertConfigBuilder]] {
