@@ -19,12 +19,10 @@ package uk.gov.hmrc.alertconfig.builders
 import java.io.{File, FileInputStream, FileNotFoundException}
 
 import org.yaml.snakeyaml.Yaml
-import spray.json.DefaultJsonProtocol._
-import uk.gov.hmrc.alertconfig.HttpStatusThreshold
 import uk.gov.hmrc.alertconfig.logging.Logger
+import uk.gov.hmrc.alertconfig.{HttpStatusThreshold, LogMessageThreshold}
 
 import scala.collection.JavaConversions.mapAsScalaMap
-
 import scala.util.{Failure, Success, Try}
 
 trait Builder[T] {
@@ -36,8 +34,10 @@ case class AlertConfigBuilder(serviceName: String,
                               exceptionThreshold: Int = 2,
                               http5xxThreshold: Int = Int.MaxValue,
                               http5xxPercentThreshold: Double = 100,
-                              containerKillThreshold : Int = 1,
-                              httpStatusThresholds: Seq[HttpStatusThreshold] = Nil) extends Builder[Option[String]]{
+                              containerKillThreshold: Int = 1,
+                              httpStatusThresholds: Seq[HttpStatusThreshold] = Nil,
+                              logMessageThresholds: Seq[LogMessageThreshold] = Nil
+                             ) extends Builder[Option[String]] {
 
   import spray.json._
 
@@ -53,9 +53,14 @@ case class AlertConfigBuilder(serviceName: String,
 
   def withHttpStatusThreshold(threshold: HttpStatusThreshold) = this.copy(httpStatusThresholds = httpStatusThresholds :+ threshold)
 
-  def withContainerKillThreshold(containerCrashThreshold : Int) = this.copy(containerKillThreshold = containerCrashThreshold)
+  def withContainerKillThreshold(containerCrashThreshold: Int) = this.copy(containerKillThreshold = containerCrashThreshold)
+
+  def withLogMessageThreshold(message: String, threshold: Int) = this.copy(logMessageThresholds = logMessageThresholds :+ LogMessageThreshold(message, threshold))
 
   def build: Option[String] = {
+    import uk.gov.hmrc.alertconfig.HttpStatusThresholdProtocol._
+
+
     val appConfigPath = System.getProperty("app-config-path", "../app-config")
     val appConfigDirectory = new File(appConfigPath)
     val appConfigFile = new File(appConfigDirectory, s"${serviceName}.yaml")
@@ -63,6 +68,7 @@ case class AlertConfigBuilder(serviceName: String,
     if (!appConfigDirectory.exists) {
       throw new FileNotFoundException(s"Could not find app-config repository: $appConfigPath")
     }
+
 
     appConfigFile match {
       case file if !file.exists =>
@@ -76,20 +82,25 @@ case class AlertConfigBuilder(serviceName: String,
 
         ZoneToServiceDomainMapper.getServiceDomain(serviceDomain).map(serviceDomain =>
           s"""
-             |{\"app\": \"$serviceName.$serviceDomain\",\"handlers\": ${handlers.toJson.compactPrint}, \"exception-threshold\":$exceptionThreshold, \"5xx-threshold\":$http5xxThreshold, \"5xx-percent-threshold\":$http5xxPercentThreshold, \"containerKillThreshold\" : $containerKillThreshold, \"httpStatusThresholds\" : $buildHttpStatusThresholds}
-          """.stripMargin
+             |{
+             |"app": "$serviceName.$serviceDomain",
+             |"handlers": ${handlers.toJson.compactPrint},
+             |"exception-threshold":$exceptionThreshold,
+             |"5xx-threshold":$http5xxThreshold,
+             |"5xx-percent-threshold":$http5xxPercentThreshold,
+             |"containerKillThreshold" : $containerKillThreshold,
+             |"httpStatusThresholds" : ${httpStatusThresholds.toJson.compactPrint},
+             |"logMessageThresholds" : $buildLogMessageThresholdsJson
+             |}
+              """.stripMargin
         )
     }
   }
 
-  def buildHttpStatusThresholds = {
-
-    import uk.gov.hmrc.alertconfig.HttpStatusThresholdProtocol._
-    val thresholdsAsJson = httpStatusThresholds.map(t => t.toJson.compactPrint).mkString(",")
-
-    s"""[${thresholdsAsJson}]"""
+  def buildLogMessageThresholdsJson = {
+    import uk.gov.hmrc.alertconfig.LogMessageThresholdProtocol._
+    logMessageThresholds.toJson.compactPrint
   }
-
 
   def getZone(appConfigFile: File): Option[String] = {
     def parseAppConfigFile: Try[Object] = {
@@ -115,8 +126,9 @@ case class TeamAlertConfigBuilder(services: Seq[String],
                                   exceptionThreshold: Int = 2,
                                   http5xxThreshold: Int = Int.MaxValue,
                                   http5xxPercentThreshold: Double = 100,
-                                  containerKillThreshold : Int = 1,
-                                  httpStatusThresholds: Seq[HttpStatusThreshold] = Nil) extends Builder[Seq[AlertConfigBuilder]] {
+                                  containerKillThreshold: Int = 1,
+                                  httpStatusThresholds: Seq[HttpStatusThreshold] = Nil,
+                                  logMessageThresholds: Seq[LogMessageThreshold] = Nil) extends Builder[Seq[AlertConfigBuilder]] {
 
   def withHandlers(handlers: String*) = this.copy(handlers = handlers)
 
@@ -130,8 +142,10 @@ case class TeamAlertConfigBuilder(services: Seq[String],
 
   def withHttpStatusThreshold(threshold: HttpStatusThreshold) = this.copy(httpStatusThresholds = httpStatusThresholds :+ threshold)
 
+  def withLogMessageThreshold(message: String, threshold: Int) = this.copy(logMessageThresholds = logMessageThresholds :+ LogMessageThreshold(message, threshold))
+
   override def build: Seq[AlertConfigBuilder] = services.map(service =>
-    AlertConfigBuilder(service, handlers, exceptionThreshold, http5xxThreshold, http5xxPercentThreshold, containerKillThreshold, httpStatusThresholds)
+    AlertConfigBuilder(service, handlers, exceptionThreshold, http5xxThreshold, http5xxPercentThreshold, containerKillThreshold, httpStatusThresholds, logMessageThresholds)
   )
 }
 
@@ -148,18 +162,18 @@ object ZoneToServiceDomainMapper {
   val logger = new Logger()
   val zoneToServiceMappingFilePath = System.getProperty("zone-mapping-path", "zone-to-service-domain-mapping.yml")
   val zoneToServiceMappingFile = new File(zoneToServiceMappingFilePath)
-  if(!zoneToServiceMappingFile.exists()) {
+  if (!zoneToServiceMappingFile.exists()) {
     throw new FileNotFoundException(s"Could not find zone to service domain mapping file: ${zoneToServiceMappingFilePath}")
   }
   val zoneToServiceDomainMappings: Map[String, String] = mapAsScalaMap[String, String](
     new Yaml().load(new FileInputStream(zoneToServiceMappingFile)).asInstanceOf[java.util.Map[String, String]])
-      .toMap
+    .toMap
 
   def getServiceDomain(zone: Option[String]): Option[String] = {
     zone match {
       case Some(_: String) => {
         val mappedServiceDomain = zoneToServiceDomainMappings.get(zone.get)
-        if(mappedServiceDomain.isEmpty) {
+        if (mappedServiceDomain.isEmpty) {
           logger.error(s"Zone to service domain mapping file '${zoneToServiceMappingFile.getAbsolutePath}' does not contain mapping for zone '${zone.get}'")
         }
         mappedServiceDomain

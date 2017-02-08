@@ -33,7 +33,8 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
   "AlertConfigBuilder" should {
     "build correct config" in  {
 
-      val config = AlertConfigBuilder("service1", handlers = Seq("h1","h2")).withContainerKillThreshold(56).build.get.parseJson.asJsObject.fields
+      val config = AlertConfigBuilder("service1", handlers = Seq("h1","h2"))
+        .withContainerKillThreshold(56).build.get.parseJson.asJsObject.fields
 
       config("app") shouldBe JsString("service1.domain.zone.1")
       config("handlers") shouldBe JsArray(JsString("h1"), JsString("h2"))
@@ -94,6 +95,20 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
         JsObject("httpStatus" -> JsNumber(502),"count" ->  JsNumber(2)),
         JsObject("httpStatus" -> JsNumber(503),"count" ->  JsNumber(3)),
         JsObject("httpStatus" -> JsNumber(504),"count" ->  JsNumber(4))
+      )
+    }
+
+    "build/configure logMessageThresholds with given thresholds" in {
+
+      val serviceConfig = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))
+          .withLogMessageThreshold("SIMUATED_ERROR1" , 3)
+          .withLogMessageThreshold("SIMUATED_ERROR2" , 4)
+          .withLogMessageThreshold("SIMUATED_ERROR3" , 5).build.get.parseJson.asJsObject.fields
+
+      serviceConfig("logMessageThresholds") shouldBe JsArray(
+        JsObject("message" -> JsString("SIMUATED_ERROR1"),"count" ->  JsNumber(3)),
+        JsObject("message" -> JsString("SIMUATED_ERROR2"),"count" ->  JsNumber(4)),
+        JsObject("message" -> JsString("SIMUATED_ERROR3"),"count" ->  JsNumber(5))
       )
     }
 

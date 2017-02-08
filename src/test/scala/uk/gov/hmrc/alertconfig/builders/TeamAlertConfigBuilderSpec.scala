@@ -18,7 +18,7 @@ package uk.gov.hmrc.alertconfig.builders
 
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpec}
 import spray.json.{JsArray, JsString}
-import uk.gov.hmrc.alertconfig.{HttpStatus, HttpStatusThreshold}
+import uk.gov.hmrc.alertconfig.{HttpStatus, HttpStatusThreshold, LogMessageThreshold}
 import spray.json._
 
 
@@ -75,6 +75,38 @@ class TeamAlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAf
         )
 
     }
+
+
+    "return TeamAlertConfigBuilder with correct logMessageThresholds" in {
+
+      val alertConfigBuilder = TeamAlertConfigBuilder.teamAlerts(Seq("service1", "service2"))
+        .withLogMessageThreshold("SIMULATED_ERROR1", 19)
+        .withLogMessageThreshold("SIMULATED_ERROR2", 20)
+
+
+      alertConfigBuilder.services shouldBe Seq("service1", "service2")
+      val configs = alertConfigBuilder.build.map(_.build.get.parseJson.asJsObject.fields)
+
+      configs.size shouldBe 2
+      val service1Config = configs(0)
+      val service2Config = configs(1)
+
+      service1Config("logMessageThresholds") shouldBe
+        JsArray(
+          JsObject("message" -> JsString("SIMULATED_ERROR1"),
+            "count" -> JsNumber(19)),
+          JsObject("message" -> JsString("SIMULATED_ERROR2"),
+            "count" -> JsNumber(20))
+        )
+      service2Config("logMessageThresholds") shouldBe
+        JsArray(
+          JsObject("message" -> JsString("SIMULATED_ERROR1"),
+            "count" -> JsNumber(19)),
+          JsObject("message" -> JsString("SIMULATED_ERROR2"),
+            "count" -> JsNumber(20))
+        )
+    }
+
 
     "throw exception if no service provided" in {
 
