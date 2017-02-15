@@ -90,7 +90,7 @@ case class AlertConfigBuilder(serviceName: String,
              |"5xx-percent-threshold":$http5xxPercentThreshold,
              |"containerKillThreshold" : $containerKillThreshold,
              |"httpStatusThresholds" : ${httpStatusThresholds.toJson.compactPrint},
-             |"logMessageThresholds" : $buildLogMessageThresholdsJson
+             |"log-message-thresholds" : $buildLogMessageThresholdsJson
              |}
               """.stripMargin
         )

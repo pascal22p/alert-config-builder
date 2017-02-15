@@ -91,14 +91,14 @@ class TeamAlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAf
       val service1Config = configs(0)
       val service2Config = configs(1)
 
-      service1Config("logMessageThresholds") shouldBe
+      service1Config("log-message-thresholds") shouldBe
         JsArray(
           JsObject("message" -> JsString("SIMULATED_ERROR1"),
             "count" -> JsNumber(19)),
           JsObject("message" -> JsString("SIMULATED_ERROR2"),
             "count" -> JsNumber(20))
         )
-      service2Config("logMessageThresholds") shouldBe
+      service2Config("log-message-thresholds") shouldBe
         JsArray(
           JsObject("message" -> JsString("SIMULATED_ERROR1"),
             "count" -> JsNumber(19)),

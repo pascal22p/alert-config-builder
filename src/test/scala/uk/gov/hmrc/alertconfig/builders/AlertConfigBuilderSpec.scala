@@ -105,7 +105,7 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
           .withLogMessageThreshold("SIMUATED_ERROR2" , 4)
           .withLogMessageThreshold("SIMUATED_ERROR3" , 5).build.get.parseJson.asJsObject.fields
 
-      serviceConfig("logMessageThresholds") shouldBe JsArray(
+      serviceConfig("log-message-thresholds") shouldBe JsArray(
         JsObject("message" -> JsString("SIMUATED_ERROR1"),"count" ->  JsNumber(3)),
         JsObject("message" -> JsString("SIMUATED_ERROR2"),"count" ->  JsNumber(4)),
         JsObject("message" -> JsString("SIMUATED_ERROR3"),"count" ->  JsNumber(5))
