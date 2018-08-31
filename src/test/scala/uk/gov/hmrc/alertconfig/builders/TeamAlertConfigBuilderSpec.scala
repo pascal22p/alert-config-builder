@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ class TeamAlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAf
       alertConfigBuilder.handlers shouldBe Seq("noop")
       alertConfigBuilder.http5xxPercentThreshold shouldBe 100
       alertConfigBuilder.http5xxThreshold shouldBe Int.MaxValue
+      alertConfigBuilder.totalHttpRequestThreshold shouldBe Int.MaxValue
       alertConfigBuilder.exceptionThreshold shouldBe 2
       alertConfigBuilder.containerKillThreshold shouldBe 1
     }
@@ -73,6 +74,26 @@ class TeamAlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAf
           JsObject("httpStatus" -> JsNumber(501),
             "count" -> JsNumber(20))
         )
+
+    }
+
+
+    "build alert-config with correct allRequestThreshold" in {
+
+      val requestThreshold = 35
+      val alertConfigBuilder = TeamAlertConfigBuilder.teamAlerts(Seq("service1", "service2"))
+        .withTotalHttpRequestThreshold(requestThreshold)
+
+
+      alertConfigBuilder.services shouldBe Seq("service1", "service2")
+      val configs = alertConfigBuilder.build.map(_.build.get.parseJson.asJsObject.fields)
+
+      configs.size shouldBe 2
+      val service1Config: Map[String, JsValue] = configs(0)
+      val service2Config: Map[String, JsValue] = configs(1)
+
+      service1Config("total-http-request-threshold") shouldBe JsNumber(requestThreshold)
+      service2Config("total-http-request-threshold") shouldBe JsNumber(requestThreshold)
 
     }
 

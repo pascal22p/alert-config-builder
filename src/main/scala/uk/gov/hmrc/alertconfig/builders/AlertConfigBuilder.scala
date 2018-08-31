@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 HM Revenue & Customs
+ * Copyright 2018 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +36,8 @@ case class AlertConfigBuilder(serviceName: String,
                               http5xxPercentThreshold: Double = 100,
                               containerKillThreshold: Int = 1,
                               httpStatusThresholds: Seq[HttpStatusThreshold] = Nil,
-                              logMessageThresholds: Seq[LogMessageThreshold] = Nil
+                              logMessageThresholds: Seq[LogMessageThreshold] = Nil,
+                              totalHttpRequestThreshold: Int = Int.MaxValue
                              ) extends Builder[Option[String]] {
 
   import spray.json._
@@ -90,6 +91,7 @@ case class AlertConfigBuilder(serviceName: String,
              |"5xx-percent-threshold":$http5xxPercentThreshold,
              |"containerKillThreshold" : $containerKillThreshold,
              |"httpStatusThresholds" : ${httpStatusThresholds.toJson.compactPrint},
+             |"total-http-request-threshold": $totalHttpRequestThreshold,
              |"log-message-thresholds" : $buildLogMessageThresholdsJson
              |}
               """.stripMargin
@@ -121,14 +123,7 @@ case class AlertConfigBuilder(serviceName: String,
   }
 }
 
-case class TeamAlertConfigBuilder(services: Seq[String],
-                                  handlers: Seq[String] = Seq("noop"),
-                                  exceptionThreshold: Int = 2,
-                                  http5xxThreshold: Int = Int.MaxValue,
-                                  http5xxPercentThreshold: Double = 100,
-                                  containerKillThreshold: Int = 1,
-                                  httpStatusThresholds: Seq[HttpStatusThreshold] = Nil,
-                                  logMessageThresholds: Seq[LogMessageThreshold] = Nil) extends Builder[Seq[AlertConfigBuilder]] {
+case class TeamAlertConfigBuilder(services: Seq[String], handlers: Seq[String] = Seq("noop"), exceptionThreshold: Int = 2, http5xxThreshold: Int = Int.MaxValue, http5xxPercentThreshold: Double = 100, containerKillThreshold: Int = 1, httpStatusThresholds: Seq[HttpStatusThreshold] = Nil, logMessageThresholds: Seq[LogMessageThreshold] = Nil, totalHttpRequestThreshold: Int = Int.MaxValue) extends Builder[Seq[AlertConfigBuilder]] {
 
   def withHandlers(handlers: String*) = this.copy(handlers = handlers)
 
@@ -142,10 +137,12 @@ case class TeamAlertConfigBuilder(services: Seq[String],
 
   def withHttpStatusThreshold(threshold: HttpStatusThreshold) = this.copy(httpStatusThresholds = httpStatusThresholds :+ threshold)
 
+  def withTotalHttpRequestThreshold(threshold: Int) = this.copy(totalHttpRequestThreshold = threshold)
+
   def withLogMessageThreshold(message: String, threshold: Int) = this.copy(logMessageThresholds = logMessageThresholds :+ LogMessageThreshold(message, threshold))
 
   override def build: Seq[AlertConfigBuilder] = services.map(service =>
-    AlertConfigBuilder(service, handlers, exceptionThreshold, http5xxThreshold, http5xxPercentThreshold, containerKillThreshold, httpStatusThresholds, logMessageThresholds)
+    AlertConfigBuilder(service, handlers, exceptionThreshold, http5xxThreshold, http5xxPercentThreshold, containerKillThreshold, httpStatusThresholds, logMessageThresholds, totalHttpRequestThreshold)
   )
 }
 

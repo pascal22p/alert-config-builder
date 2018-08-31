@@ -43,7 +43,7 @@ private object AppDependencies {
 
 
   lazy val test: Seq[ModuleID] = Seq(
-    "org.json4s" % "json4s-jackson_2.10" % "3.1.0" % "test",
+    "org.json4s" %% "json4s-jackson" % "3.6.0" % "test",
     "org.scalatest" %% "scalatest" % "2.2.4" % "test",
     "org.pegdown" % "pegdown" % "1.5.0" % "test"
   )
