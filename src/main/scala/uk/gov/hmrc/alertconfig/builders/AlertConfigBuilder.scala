@@ -137,7 +137,7 @@ case class TeamAlertConfigBuilder(services: Seq[String], handlers: Seq[String] =
 
   def withHttpStatusThreshold(threshold: HttpStatusThreshold) = this.copy(httpStatusThresholds = httpStatusThresholds :+ threshold)
 
-  def withTotalHttpRequestThreshold(threshold: Int) = this.copy(totalHttpRequestThreshold = threshold)
+  def withTotalHttpRequestsCountThreshold(threshold: Int) = this.copy(totalHttpRequestThreshold = threshold)
 
   def withLogMessageThreshold(message: String, threshold: Int) = this.copy(logMessageThresholds = logMessageThresholds :+ LogMessageThreshold(message, threshold))
 

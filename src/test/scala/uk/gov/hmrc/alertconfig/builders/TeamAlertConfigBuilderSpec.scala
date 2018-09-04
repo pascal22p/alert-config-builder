@@ -82,7 +82,7 @@ class TeamAlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAf
 
       val requestThreshold = 35
       val alertConfigBuilder = TeamAlertConfigBuilder.teamAlerts(Seq("service1", "service2"))
-        .withTotalHttpRequestThreshold(requestThreshold)
+        .withTotalHttpRequestsCountThreshold(requestThreshold)
 
 
       alertConfigBuilder.services shouldBe Seq("service1", "service2")
