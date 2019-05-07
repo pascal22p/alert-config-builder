@@ -43,7 +43,7 @@ object AllEnvironmentAlertConfigBuilder {
     e -> JsObject("handlers" -> JsObject(builders.map(b => b.alertConfigFor(e)).toList.sortBy(_._1) : _*))).toMap
 }
 
-case class EnvironmentAlertBuilder(handlerName:String, enabledEnvironments: Map[Environment, Set[Severity]] = Map((Production, Set(Ok, Warning, Critical)))) {
+case class EnvironmentAlertBuilder(handlerName:String, command:Option[JsValue] = None, enabledEnvironments: Map[Environment, Set[Severity]] = Map((Production, Set(Ok, Warning, Critical)))) {
   private val defaultSeverities: Set[Severity] = Set(Ok, Warning, Critical)
   def inIntegration(severities: Set[Severity] = defaultSeverities): EnvironmentAlertBuilder =
     this.copy(enabledEnvironments = enabledEnvironments + (Integration -> severities))
@@ -60,13 +60,17 @@ case class EnvironmentAlertBuilder(handlerName:String, enabledEnvironments: Map[
   def inProduction(severities: Set[Severity] = defaultSeverities): EnvironmentAlertBuilder =
     this.copy(enabledEnvironments = enabledEnvironments + (Production -> severities))
 
-  def alertConfigFor(environment: Environment): (String, JsObject) =
+  def withCommand(customCommand: String): EnvironmentAlertBuilder =
+    this.copy(command = Option(JsString(customCommand)))
+
+  def alertConfigFor(environment: Environment): (String, JsObject) = {
     handlerName ->
       JsObject(
-        "command" -> commandFor(handlerName, environment),
+        "command" -> command.getOrElse(commandFor(handlerName, environment)),
         "type" -> JsString("pipe"),
         "severities" ->  severitiesFor(environment),
         "filter" -> JsString("occurrences"))
+  }
 
   private def commandFor(service: String, environment: Environment): JsValue =
     if (enabledEnvironments.contains(environment))
