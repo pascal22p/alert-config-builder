@@ -66,7 +66,7 @@ case class EnvironmentAlertBuilder(handlerName:String, command:Option[JsValue] =
   def alertConfigFor(environment: Environment): (String, JsObject) = {
     handlerName ->
       JsObject(
-        "command" -> command.getOrElse(commandFor(handlerName, environment)),
+        "command" -> commandFor(handlerName, environment),
         "type" -> JsString("pipe"),
         "severities" ->  severitiesFor(environment),
         "filter" -> JsString("occurrences"))
@@ -74,7 +74,7 @@ case class EnvironmentAlertBuilder(handlerName:String, command:Option[JsValue] =
 
   private def commandFor(service: String, environment: Environment): JsValue =
     if (enabledEnvironments.contains(environment))
-      JsString(s"/etc/sensu/handlers/hmrc_pagerduty_multiteam_env.rb --team $service -e $environment")
+      command.getOrElse(JsString(s"/etc/sensu/handlers/hmrc_pagerduty_multiteam_env.rb --team $service -e $environment"))
     else
       JsString("/etc/sensu/handlers/noop.rb")
 
