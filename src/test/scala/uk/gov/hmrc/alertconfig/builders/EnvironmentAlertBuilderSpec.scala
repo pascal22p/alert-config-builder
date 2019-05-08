@@ -52,6 +52,16 @@ class EnvironmentAlertBuilderSpec  extends WordSpec with Matchers with BeforeAnd
             "filter" -> JsString("occurrences"))
     }
 
+    "create config with integration disabled with custom command" in {
+      EnvironmentAlertBuilder("infra").withCommand("/etc/sensu/handlers/dose-pagerduty-high.rb").alertConfigFor(Integration) shouldBe
+        "infra" ->
+          JsObject(
+            "command" -> JsString("/etc/sensu/handlers/noop.rb"),
+            "type" -> JsString("pipe"),
+            "severities" ->  JsArray(JsString("ok"), JsString("warning"), JsString("critical")),
+            "filter" -> JsString("occurrences"))
+    }
+
     "create config with integration disabled" in {
       EnvironmentAlertBuilder("team-telemetry-test").alertConfigFor(Integration) shouldBe
         "team-telemetry-test" ->
