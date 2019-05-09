@@ -62,6 +62,16 @@ class EnvironmentAlertBuilderSpec  extends WordSpec with Matchers with BeforeAnd
             "filter" -> JsString("occurrences"))
     }
 
+    "create config for txm-infra with integration enabled and custom environment" in {
+      EnvironmentAlertBuilder("txm-infra").inIntegration(customEnv="txm_integration").alertConfigFor(Integration) shouldBe
+        "txm-infra" ->
+          JsObject(
+            "command" -> JsString("/etc/sensu/handlers/hmrc_pagerduty_multiteam_env.rb --team txm-infra -e txm_integration"),
+            "type" -> JsString("pipe"),
+            "severities" ->  JsArray(JsString("ok"), JsString("warning"), JsString("critical")),
+            "filter" -> JsString("occurrences"))
+    }
+
     "create config with integration disabled" in {
       EnvironmentAlertBuilder("team-telemetry-test").alertConfigFor(Integration) shouldBe
         "team-telemetry-test" ->
@@ -82,6 +92,14 @@ class EnvironmentAlertBuilderSpec  extends WordSpec with Matchers with BeforeAnd
             "filter" -> JsString("occurrences"))
     }
 
-
+    "create config with management enabled should filter kitchen & packer" in {
+      EnvironmentAlertBuilder("infra").inManagement().alertConfigFor(Management) shouldBe
+        "infra" ->
+          JsObject(
+            "command" -> JsString("/etc/sensu/handlers/hmrc_pagerduty_multiteam_env.rb --team infra -e aws_management"),
+            "type" -> JsString("pipe"),
+            "severities" ->  JsArray(JsString("ok"), JsString("warning"), JsString("critical")),
+            "filter" -> JsArray(JsString("occurrences"),JsString("kitchen_filter"),JsString("packer_filter")))
+    }
   }
 }
