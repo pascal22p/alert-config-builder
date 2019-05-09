@@ -48,46 +48,54 @@ case class EnvironmentAlertBuilder(
                                     command:Option[JsValue] = None,
                                     enabledEnvironments: Map[Environment, Set[Severity]] = Map((Production, Set(Ok, Warning, Critical))),
                                     customEnvironmentNames: Map[Environment, String] = Map((Production, "aws_production")),
-                                    handlerFilter: JsValue = JsString("occurrences")
+                                    handlerFilters: Map[Environment, JsValue] = Map((Production, JsString("occurrences")))
                                   ) {
 
   private val defaultSeverities: Set[Severity] = Set(Ok, Warning, Critical)
+  private val defaultFilter: JsValue = JsString("occurrences")
+  private val defaultMgmtFilter: JsValue = JsArray(JsString("occurrences"),JsString("kitchen_filter"),JsString("packer_filter"))
 
-  def inIntegration(severities: Set[Severity] = defaultSeverities, customEnv: String = Integration.toString): EnvironmentAlertBuilder =
+  def inIntegration(severities: Set[Severity] = defaultSeverities, customEnv: String = Integration.toString, customFilter: JsValue = defaultFilter): EnvironmentAlertBuilder =
     this.copy(
       enabledEnvironments = enabledEnvironments + (Integration -> severities),
-      customEnvironmentNames = customEnvironmentNames + (Integration -> customEnv)
+      customEnvironmentNames = customEnvironmentNames + (Integration -> customEnv),
+      handlerFilters = handlerFilters + (Integration -> customFilter)
     )
-  def inDevelopment(severities: Set[Severity] = defaultSeverities, customEnv: String = Development.toString): EnvironmentAlertBuilder =
+  def inDevelopment(severities: Set[Severity] = defaultSeverities, customEnv: String = Development.toString, customFilter: JsValue = defaultFilter): EnvironmentAlertBuilder =
     this.copy(
       enabledEnvironments = enabledEnvironments + (Development -> severities),
-      customEnvironmentNames = customEnvironmentNames + (Development -> customEnv)
+      customEnvironmentNames = customEnvironmentNames + (Development -> customEnv),
+      handlerFilters = handlerFilters + (Development -> customFilter)
     )
-  def inQa(severities: Set[Severity] = defaultSeverities, customEnv: String = Qa.toString): EnvironmentAlertBuilder =
+  def inQa(severities: Set[Severity] = defaultSeverities, customEnv: String = Qa.toString, customFilter: JsValue = defaultFilter): EnvironmentAlertBuilder =
     this.copy(
       enabledEnvironments = enabledEnvironments + (Qa -> severities),
-      customEnvironmentNames = customEnvironmentNames + (Qa -> customEnv)
+      customEnvironmentNames = customEnvironmentNames + (Qa -> customEnv),
+      handlerFilters = handlerFilters + (Qa -> customFilter)
     )
-  def inStaging(severities: Set[Severity] = defaultSeverities, customEnv: String = Staging.toString): EnvironmentAlertBuilder =
+  def inStaging(severities: Set[Severity] = defaultSeverities, customEnv: String = Staging.toString, customFilter: JsValue = defaultFilter): EnvironmentAlertBuilder =
     this.copy(
       enabledEnvironments = enabledEnvironments + (Staging -> severities),
-      customEnvironmentNames = customEnvironmentNames + (Staging -> customEnv)
+      customEnvironmentNames = customEnvironmentNames + (Staging -> customEnv),
+      handlerFilters = handlerFilters + (Staging -> customFilter)
     )
-  def inExternalTest(severities: Set[Severity] = defaultSeverities, customEnv: String = ExternalTest.toString): EnvironmentAlertBuilder =
+  def inExternalTest(severities: Set[Severity] = defaultSeverities, customEnv: String = ExternalTest.toString, customFilter: JsValue = defaultFilter): EnvironmentAlertBuilder =
     this.copy(
       enabledEnvironments = enabledEnvironments + (ExternalTest -> severities),
-      customEnvironmentNames = customEnvironmentNames + (ExternalTest -> customEnv)
+      customEnvironmentNames = customEnvironmentNames + (ExternalTest -> customEnv),
+      handlerFilters = handlerFilters + (ExternalTest -> customFilter)
     )
-  def inManagement(severities: Set[Severity] = defaultSeverities, customEnv: String = Management.toString): EnvironmentAlertBuilder =
+  def inManagement(severities: Set[Severity] = defaultSeverities, customEnv: String = Management.toString, customFilter: JsValue = defaultMgmtFilter): EnvironmentAlertBuilder =
     this.copy(
       enabledEnvironments = enabledEnvironments + (Management -> severities),
       customEnvironmentNames = customEnvironmentNames + (Management -> customEnv),
-      handlerFilter = JsArray(JsString("occurrences"),JsString("kitchen_filter"),JsString("packer_filter"))
+      handlerFilters = handlerFilters + (Management -> customFilter)
     )
-  def inProduction(severities: Set[Severity] = defaultSeverities, customEnv: String = Production.toString): EnvironmentAlertBuilder =
+  def inProduction(severities: Set[Severity] = defaultSeverities, customEnv: String = Production.toString, customFilter: JsValue = defaultFilter): EnvironmentAlertBuilder =
     this.copy(
       enabledEnvironments = enabledEnvironments + (Production -> severities),
-      customEnvironmentNames = customEnvironmentNames + (Production -> customEnv)
+      customEnvironmentNames = customEnvironmentNames + (Production -> customEnv),
+      handlerFilters = handlerFilters + (Production -> customFilter)
     )
 
   def withCommand(customCommand: String): EnvironmentAlertBuilder =
@@ -99,7 +107,7 @@ case class EnvironmentAlertBuilder(
         "command" -> commandFor(handlerName, environment),
         "type" -> JsString("pipe"),
         "severities" ->  severitiesFor(environment),
-        "filter" -> handlerFilter)
+        "filter" -> handlerFilters.getOrElse(environment, defaultFilter))
   }
 
   private def commandFor(service: String, environment: Environment): JsValue =
