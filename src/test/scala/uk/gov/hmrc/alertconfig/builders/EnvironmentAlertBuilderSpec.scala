@@ -99,7 +99,7 @@ class EnvironmentAlertBuilderSpec  extends WordSpec with Matchers with BeforeAnd
             "command" -> JsString("/etc/sensu/handlers/hmrc_pagerduty_multiteam_env.rb --team infra -e aws_management"),
             "type" -> JsString("pipe"),
             "severities" ->  JsArray(JsString("ok"), JsString("warning"), JsString("critical")),
-            "filter" -> JsArray(JsString("occurrences"),JsString("kitchen_filter"),JsString("packer_filter")))
+            "filters" -> JsArray(JsString("occurrences"),JsString("kitchen_filter"),JsString("packer_filter")))
     }
   }
 }
