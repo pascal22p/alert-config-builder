@@ -98,16 +98,23 @@ case class EnvironmentAlertBuilder(
       handlerFilters = handlerFilters + (Production -> customFilter)
     )
 
+  def disableProduction(): EnvironmentAlertBuilder =
+    this.copy(enabledEnvironments = enabledEnvironments - Production)
+
   def withCommand(customCommand: String): EnvironmentAlertBuilder =
     this.copy(command = Option(JsString(customCommand)))
 
   def alertConfigFor(environment: Environment): (String, JsObject) = {
+    val filterType: String = {
+      if(handlerFilters.getOrElse(environment, defaultFilter).isInstanceOf[JsArray]) "filters"
+      else "filter"
+    }
     handlerName ->
       JsObject(
         "command" -> commandFor(handlerName, environment),
         "type" -> JsString("pipe"),
         "severities" ->  severitiesFor(environment),
-        "filter" -> handlerFilters.getOrElse(environment, defaultFilter))
+        s"$filterType" -> handlerFilters.getOrElse(environment, defaultFilter))
   }
 
   private def commandFor(service: String, environment: Environment): JsValue =
