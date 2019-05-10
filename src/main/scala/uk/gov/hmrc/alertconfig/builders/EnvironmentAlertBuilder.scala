@@ -98,6 +98,9 @@ case class EnvironmentAlertBuilder(
       handlerFilters = handlerFilters + (Production -> customFilter)
     )
 
+  def disableProduction(): EnvironmentAlertBuilder =
+    this.copy(enabledEnvironments = enabledEnvironments - Production)
+
   def withCommand(customCommand: String): EnvironmentAlertBuilder =
     this.copy(command = Option(JsString(customCommand)))
 

@@ -22,11 +22,21 @@ import spray.json._
 class EnvironmentAlertBuilderSpec  extends WordSpec with Matchers with BeforeAndAfterEach {
 
   "EnvironmentAlertBuilder" should {
-    "create config with production enabled with default severities" in {
-      EnvironmentAlertBuilder("team-telemetry").inProduction().alertConfigFor(Production) shouldBe
+    "create config with production enabled by default" in {
+      EnvironmentAlertBuilder("team-telemetry").alertConfigFor(Production) shouldBe
         "team-telemetry" ->
           JsObject(
             "command" -> JsString("/etc/sensu/handlers/hmrc_pagerduty_multiteam_env.rb --team team-telemetry -e aws_production"),
+            "type" -> JsString("pipe"),
+            "severities" ->  JsArray(JsString("ok"), JsString("warning"), JsString("critical")),
+            "filter" -> JsString("occurrences"))
+    }
+
+    "create config with production disabled" in {
+      EnvironmentAlertBuilder("team-telemetry").disableProduction().alertConfigFor(Production) shouldBe
+        "team-telemetry" ->
+          JsObject(
+            "command" -> JsString("/etc/sensu/handlers/noop.rb"),
             "type" -> JsString("pipe"),
             "severities" ->  JsArray(JsString("ok"), JsString("warning"), JsString("critical")),
             "filter" -> JsString("occurrences"))
