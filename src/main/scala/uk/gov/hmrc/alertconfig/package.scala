@@ -28,4 +28,13 @@ package object alertconfig {
       case something => throw DeserializationException(s"Expected a value from enum $enu instead of $something")
     }
   }
+
+  def jsonSeverityEnum(enu: AlertSeverity.type) = new JsonFormat[AlertSeverity.Value] {
+    def write(obj: AlertSeverity.AlertSeverityType) = JsString(obj.toString)
+
+    def read(json: JsValue) = json match {
+      case JsNumber(num) => AlertSeverity(num.toInt)
+      case something => throw DeserializationException(s"Expected a value from enum $enu instead of $something")
+    }
+  }
 }
