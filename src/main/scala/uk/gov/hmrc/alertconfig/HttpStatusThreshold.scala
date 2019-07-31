@@ -18,9 +18,10 @@ package uk.gov.hmrc.alertconfig
 
 import spray.json.DefaultJsonProtocol
 import uk.gov.hmrc.alertconfig.HttpStatus.HttpStatusType
+import uk.gov.hmrc.alertconfig.AlertSeverity.AlertSeverityType
 
 
-case class HttpStatusThreshold(httpStatus: HttpStatusType, count: Int = 1)
+case class HttpStatusThreshold(httpStatus: HttpStatusType, count: Int = 1, severity: AlertSeverityType = AlertSeverity.critical)
 
 
 object HttpStatus extends Enumeration {
@@ -33,10 +34,19 @@ object HttpStatus extends Enumeration {
   val HTTP_STATUS_504 = Value(504)
 }
 
+object AlertSeverity extends Enumeration {
+  type AlertSeverityType = Value
+  val info = Value("Info")
+  val warning = Value("Warning")
+  val error = Value("Error")
+  val critical = Value("Critical")
+}
 
 object HttpStatusThresholdProtocol extends DefaultJsonProtocol {
 
   implicit val httpStatusFormat = jsonHttpStatusEnum(HttpStatus)
 
-  implicit val thresholdFormat = jsonFormat2(HttpStatusThreshold)
+  implicit val severityFormat = jsonSeverityEnum(AlertSeverity)
+
+  implicit val thresholdFormat = jsonFormat3(HttpStatusThreshold)
 }

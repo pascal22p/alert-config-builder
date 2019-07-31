@@ -21,7 +21,7 @@ import java.io.FileNotFoundException
 import org.scalatest._
 import spray.json._
 import uk.gov.hmrc.alertconfig.HttpStatus._
-import uk.gov.hmrc.alertconfig.HttpStatusThreshold
+import uk.gov.hmrc.alertconfig.{HttpStatusThreshold, AlertSeverity}
 
 class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterEach {
 
@@ -85,17 +85,17 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
       assert(exception.getCause.isInstanceOf[FileNotFoundException])
     }
 
-    "build/configure http status threshold with given thresholds" in {
+    "build/configure http status threshold with given thresholds and severities" in {
 
       val serviceConfig = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))
-        .withHttpStatusThreshold(HttpStatusThreshold(HTTP_STATUS_502, 2))
-        .withHttpStatusThreshold(HttpStatusThreshold(HTTP_STATUS_503, 3))
+        .withHttpStatusThreshold(HttpStatusThreshold(HTTP_STATUS_502, 2, AlertSeverity.warning))
+        .withHttpStatusThreshold(HttpStatusThreshold(HTTP_STATUS_503, 3, AlertSeverity.error))
         .withHttpStatusThreshold(HttpStatusThreshold(HTTP_STATUS_504, 4)).build.get.parseJson.asJsObject.fields
 
       serviceConfig("httpStatusThresholds") shouldBe JsArray(
-        JsObject("httpStatus" -> JsNumber(502),"count" ->  JsNumber(2)),
-        JsObject("httpStatus" -> JsNumber(503),"count" ->  JsNumber(3)),
-        JsObject("httpStatus" -> JsNumber(504),"count" ->  JsNumber(4))
+        JsObject("httpStatus" -> JsNumber(502),"count" ->  JsNumber(2), "severity" -> JsString("Warning")),
+        JsObject("httpStatus" -> JsNumber(503),"count" ->  JsNumber(3), "severity" -> JsString("Error")),
+        JsObject("httpStatus" -> JsNumber(504),"count" ->  JsNumber(4), "severity" -> JsString("Critical"))
       )
     }
 

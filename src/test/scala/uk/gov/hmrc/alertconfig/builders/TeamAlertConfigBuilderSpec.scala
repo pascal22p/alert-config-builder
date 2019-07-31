@@ -18,7 +18,7 @@ package uk.gov.hmrc.alertconfig.builders
 
 import org.scalatest.{BeforeAndAfterEach, Matchers, WordSpec}
 import spray.json.{JsArray, JsString}
-import uk.gov.hmrc.alertconfig.{HttpStatus, HttpStatusThreshold, LogMessageThreshold}
+import uk.gov.hmrc.alertconfig.{AlertSeverity, HttpStatus, HttpStatusThreshold, LogMessageThreshold}
 import spray.json._
 
 
@@ -46,7 +46,7 @@ class TeamAlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAf
 
     "return TeamAlertConfigBuilder with correct httpStatusThresholds" in {
 
-      val threshold1 = HttpStatusThreshold(HttpStatus.HTTP_STATUS_500, 19)
+      val threshold1 = HttpStatusThreshold(HttpStatus.HTTP_STATUS_500, 19, AlertSeverity.warning)
       val threshold2 = HttpStatusThreshold(HttpStatus.HTTP_STATUS_501, 20)
       val alertConfigBuilder = TeamAlertConfigBuilder.teamAlerts(Seq("service1", "service2"))
         .withHttpStatusThreshold(threshold1)
@@ -63,16 +63,20 @@ class TeamAlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAf
       service1Config("httpStatusThresholds") shouldBe
         JsArray(
           JsObject("httpStatus" -> JsNumber(500),
-            "count" -> JsNumber(19)),
+            "count" -> JsNumber(19),
+            "severity" -> JsString("Warning")),
           JsObject("httpStatus" -> JsNumber(501),
-            "count" -> JsNumber(20))
+            "count" -> JsNumber(20),
+            "severity" -> JsString("Critical"))
         )
       service2Config("httpStatusThresholds") shouldBe
         JsArray(
           JsObject("httpStatus" -> JsNumber(500),
-            "count" -> JsNumber(19)),
+            "count" -> JsNumber(19),
+            "severity" -> JsString("Warning")),
           JsObject("httpStatus" -> JsNumber(501),
-            "count" -> JsNumber(20))
+            "count" -> JsNumber(20),
+            "severity" -> JsString("Critical"))
         )
 
     }
