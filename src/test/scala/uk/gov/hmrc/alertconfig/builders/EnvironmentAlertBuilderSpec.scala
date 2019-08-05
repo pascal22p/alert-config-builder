@@ -83,8 +83,8 @@ class EnvironmentAlertBuilderSpec  extends WordSpec with Matchers with BeforeAnd
     }
 
     "create config with integration disabled" in {
-      EnvironmentAlertBuilder("team-telemetry-test").alertConfigFor(Integration) shouldBe
-        "team-telemetry-test" ->
+      EnvironmentAlertBuilder("labs-team-telemetry").alertConfigFor(Integration) shouldBe
+        "labs-team-telemetry" ->
           JsObject(
             "command" -> JsString("/etc/sensu/handlers/noop.rb"),
             "type" -> JsString("pipe"),
