@@ -119,7 +119,7 @@ case class EnvironmentAlertBuilder(
 
   private def commandFor(service: String, environment: Environment): JsValue =
     if (enabledEnvironments.contains(environment))
-      command.getOrElse(JsString(s"/etc/sensu/handlers/hmrc_pagerduty_multiteam_env.rb --team $service -e ${customEnvironmentNames(environment)}"))
+      command.getOrElse(JsString(s"/etc/sensu/handlers/hmrc_pagerduty_multiteam_env_apiv2.rb --team $service -e ${customEnvironmentNames(environment)}"))
     else
       JsString("/etc/sensu/handlers/noop.rb")
 
