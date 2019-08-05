@@ -30,7 +30,7 @@ class AllEnvironmentAlertConfigBuilderSpec extends FunSuite with Matchers with B
 
   def defaultEnabledHandlerConfig(service: String, environment: Environment): JsObject =
     JsObject(
-      "command" -> JsString(s"/etc/sensu/handlers/hmrc_pagerduty_multiteam_env.rb --team $service -e $environment"),
+      "command" -> JsString(s"/etc/sensu/handlers/hmrc_pagerduty_multiteam_env_apiv2.rb --team $service -e $environment"),
       "type" -> JsString("pipe"),
       "severities" ->  JsArray(JsString("ok"), JsString("warning"), JsString("critical")),
       "filter" -> JsString("occurrences"))

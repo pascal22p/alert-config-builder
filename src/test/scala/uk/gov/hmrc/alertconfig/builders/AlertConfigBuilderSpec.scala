@@ -93,9 +93,9 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
         .withHttpStatusThreshold(HttpStatusThreshold(HTTP_STATUS_504, 4)).build.get.parseJson.asJsObject.fields
 
       serviceConfig("httpStatusThresholds") shouldBe JsArray(
-        JsObject("httpStatus" -> JsNumber(502),"count" ->  JsNumber(2), "severity" -> JsString("Warning")),
-        JsObject("httpStatus" -> JsNumber(503),"count" ->  JsNumber(3), "severity" -> JsString("Error")),
-        JsObject("httpStatus" -> JsNumber(504),"count" ->  JsNumber(4), "severity" -> JsString("Critical"))
+        JsObject("httpStatus" -> JsNumber(502),"count" ->  JsNumber(2), "severity" -> JsString("warning")),
+        JsObject("httpStatus" -> JsNumber(503),"count" ->  JsNumber(3), "severity" -> JsString("error")),
+        JsObject("httpStatus" -> JsNumber(504),"count" ->  JsNumber(4), "severity" -> JsString("critical"))
       )
     }
 

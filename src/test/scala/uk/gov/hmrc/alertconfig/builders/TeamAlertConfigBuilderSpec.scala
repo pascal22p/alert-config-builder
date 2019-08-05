@@ -64,19 +64,19 @@ class TeamAlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAf
         JsArray(
           JsObject("httpStatus" -> JsNumber(500),
             "count" -> JsNumber(19),
-            "severity" -> JsString("Warning")),
+            "severity" -> JsString("warning")),
           JsObject("httpStatus" -> JsNumber(501),
             "count" -> JsNumber(20),
-            "severity" -> JsString("Critical"))
+            "severity" -> JsString("critical"))
         )
       service2Config("httpStatusThresholds") shouldBe
         JsArray(
           JsObject("httpStatus" -> JsNumber(500),
             "count" -> JsNumber(19),
-            "severity" -> JsString("Warning")),
+            "severity" -> JsString("warning")),
           JsObject("httpStatus" -> JsNumber(501),
             "count" -> JsNumber(20),
-            "severity" -> JsString("Critical"))
+            "severity" -> JsString("critical"))
         )
 
     }

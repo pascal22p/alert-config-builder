@@ -26,7 +26,7 @@ class EnvironmentAlertBuilderSpec  extends WordSpec with Matchers with BeforeAnd
       EnvironmentAlertBuilder("team-telemetry").alertConfigFor(Production) shouldBe
         "team-telemetry" ->
           JsObject(
-            "command" -> JsString("/etc/sensu/handlers/hmrc_pagerduty_multiteam_env.rb --team team-telemetry -e aws_production"),
+            "command" -> JsString("/etc/sensu/handlers/hmrc_pagerduty_multiteam_env_apiv2.rb --team team-telemetry -e aws_production"),
             "type" -> JsString("pipe"),
             "severities" ->  JsArray(JsString("ok"), JsString("warning"), JsString("critical")),
             "filter" -> JsString("occurrences"))
@@ -46,7 +46,7 @@ class EnvironmentAlertBuilderSpec  extends WordSpec with Matchers with BeforeAnd
       EnvironmentAlertBuilder("infra").inIntegration().alertConfigFor(Integration) shouldBe
         "infra" ->
           JsObject(
-            "command" -> JsString("/etc/sensu/handlers/hmrc_pagerduty_multiteam_env.rb --team infra -e aws_integration"),
+            "command" -> JsString("/etc/sensu/handlers/hmrc_pagerduty_multiteam_env_apiv2.rb --team infra -e aws_integration"),
             "type" -> JsString("pipe"),
             "severities" ->  JsArray(JsString("ok"), JsString("warning"), JsString("critical")),
             "filter" -> JsString("occurrences"))
@@ -76,7 +76,7 @@ class EnvironmentAlertBuilderSpec  extends WordSpec with Matchers with BeforeAnd
       EnvironmentAlertBuilder("txm-infra").inIntegration(customEnv="txm_integration").alertConfigFor(Integration) shouldBe
         "txm-infra" ->
           JsObject(
-            "command" -> JsString("/etc/sensu/handlers/hmrc_pagerduty_multiteam_env.rb --team txm-infra -e txm_integration"),
+            "command" -> JsString("/etc/sensu/handlers/hmrc_pagerduty_multiteam_env_apiv2.rb --team txm-infra -e txm_integration"),
             "type" -> JsString("pipe"),
             "severities" ->  JsArray(JsString("ok"), JsString("warning"), JsString("critical")),
             "filter" -> JsString("occurrences"))
@@ -96,7 +96,7 @@ class EnvironmentAlertBuilderSpec  extends WordSpec with Matchers with BeforeAnd
       EnvironmentAlertBuilder("team-telemetry").inIntegration(Set(Ok, Warning, Critical, Unknown)).alertConfigFor(Integration) shouldBe
         "team-telemetry" ->
           JsObject(
-            "command" -> JsString("/etc/sensu/handlers/hmrc_pagerduty_multiteam_env.rb --team team-telemetry -e aws_integration"),
+            "command" -> JsString("/etc/sensu/handlers/hmrc_pagerduty_multiteam_env_apiv2.rb --team team-telemetry -e aws_integration"),
             "type" -> JsString("pipe"),
             "severities" ->  JsArray(JsString("ok"), JsString("warning"), JsString("critical"), JsString("unknown")),
             "filter" -> JsString("occurrences"))
@@ -106,7 +106,7 @@ class EnvironmentAlertBuilderSpec  extends WordSpec with Matchers with BeforeAnd
       EnvironmentAlertBuilder("infra").inManagement().alertConfigFor(Management) shouldBe
         "infra" ->
           JsObject(
-            "command" -> JsString("/etc/sensu/handlers/hmrc_pagerduty_multiteam_env.rb --team infra -e aws_management"),
+            "command" -> JsString("/etc/sensu/handlers/hmrc_pagerduty_multiteam_env_apiv2.rb --team infra -e aws_management"),
             "type" -> JsString("pipe"),
             "severities" ->  JsArray(JsString("ok"), JsString("warning"), JsString("critical")),
             "filters" -> JsArray(JsString("occurrences"),JsString("kitchen_filter"),JsString("packer_filter")))

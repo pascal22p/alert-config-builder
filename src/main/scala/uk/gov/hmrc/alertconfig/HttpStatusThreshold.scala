@@ -34,14 +34,6 @@ object HttpStatus extends Enumeration {
   val HTTP_STATUS_504 = Value(504)
 }
 
-object AlertSeverity extends Enumeration {
-  type AlertSeverityType = Value
-  val info = Value("Info")
-  val warning = Value("Warning")
-  val error = Value("Error")
-  val critical = Value("Critical")
-}
-
 object HttpStatusThresholdProtocol extends DefaultJsonProtocol {
 
   implicit val httpStatusFormat = jsonHttpStatusEnum(HttpStatus)
