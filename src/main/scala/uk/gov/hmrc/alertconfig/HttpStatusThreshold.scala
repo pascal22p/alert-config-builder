@@ -27,6 +27,8 @@ case class HttpStatusThreshold(httpStatus: HttpStatusType, count: Int = 1, sever
 object HttpStatus extends Enumeration {
 
   type HttpStatusType = Value
+  val HTTP_STATUS_429 = Value(429)
+  val HTTP_STATUS_499 = Value(499)
   val HTTP_STATUS_500 = Value(500)
   val HTTP_STATUS_501 = Value(501)
   val HTTP_STATUS_502 = Value(502)
