@@ -106,6 +106,14 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
       serviceConfig("5xx-threshold") shouldBe JsObject("count" ->  JsNumber(2), "severity" -> JsString("warning"))
     }
 
+    "build/configure http 5xx threshold with given thresholds and unspecified severity" in {
+
+      val serviceConfig: Map[String, JsValue] = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))
+        .withHttp5xxThreshold(2).build.get.parseJson.asJsObject.fields
+
+      serviceConfig("5xx-threshold") shouldBe JsObject("count" ->  JsNumber(2), "severity" -> JsString("critical"))
+    }
+
     "build/configure logMessageThresholds with given thresholds" in {
 
       val serviceConfig = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))

@@ -21,7 +21,7 @@ import java.io.{File, FileInputStream, FileNotFoundException}
 import org.yaml.snakeyaml.Yaml
 import uk.gov.hmrc.alertconfig.AlertSeverity.AlertSeverityType
 import uk.gov.hmrc.alertconfig.logging.Logger
-import uk.gov.hmrc.alertconfig.{Http5xxThreshold, Http5xxThresholdProtocol, HttpStatusThreshold, LogMessageThreshold}
+import uk.gov.hmrc.alertconfig.{AlertSeverity, Http5xxThreshold, Http5xxThresholdProtocol, HttpStatusThreshold, LogMessageThreshold}
 
 import scala.collection.JavaConversions.mapAsScalaMap
 import scala.util.{Failure, Success, Try}
@@ -49,7 +49,7 @@ case class AlertConfigBuilder(serviceName: String,
 
   def withExceptionThreshold(exceptionThreshold: Int) = this.copy(exceptionThreshold = exceptionThreshold)
 
-  def withHttp5xxThreshold(http5xxThreshold: Int, severity: AlertSeverityType) = this.copy(http5xxThreshold = Http5xxThreshold(http5xxThreshold, severity))
+  def withHttp5xxThreshold(http5xxThreshold: Int, severity: AlertSeverityType = AlertSeverity.critical) = this.copy(http5xxThreshold = Http5xxThreshold(http5xxThreshold, severity))
 
   def withHttp5xxPercentThreshold(http5xxPercentThreshold: Int) = this.copy(http5xxPercentThreshold = http5xxPercentThreshold)
 
