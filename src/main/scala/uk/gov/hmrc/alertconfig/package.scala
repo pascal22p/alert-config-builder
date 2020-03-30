@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +19,6 @@ package uk.gov.hmrc
 import spray.json.{DeserializationException, JsNumber, JsString, JsValue, JsonFormat}
 
 package object alertconfig {
-
-  def jsonHttpStatusEnum(enu: HttpStatus.type) = new JsonFormat[HttpStatus.Value] {
-    def write(obj: HttpStatus.HttpStatusType) = JsNumber(obj.id)
-
-    def read(json: JsValue) = json match {
-      case JsNumber(num) => HttpStatus(num.toInt)
-      case something => throw DeserializationException(s"Expected a value from enum $enu instead of $something")
-    }
-  }
 
   def jsonSeverityEnum(enu: AlertSeverity.type) = new JsonFormat[AlertSeverity.Value] {
     def write(obj: AlertSeverity.AlertSeverityType) = JsString(obj.toString)
