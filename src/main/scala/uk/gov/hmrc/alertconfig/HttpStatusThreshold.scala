@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,17 +23,18 @@ import uk.gov.hmrc.alertconfig.AlertSeverity.AlertSeverityType
 
 case class HttpStatusThreshold(httpStatus: HttpStatusType, count: Int = 1, severity: AlertSeverityType = AlertSeverity.critical)
 
-
-object HttpStatus extends Enumeration {
-
-  type HttpStatusType = Value
-  val HTTP_STATUS_429 = Value(429)
-  val HTTP_STATUS_499 = Value(499)
-  val HTTP_STATUS_500 = Value(500)
-  val HTTP_STATUS_501 = Value(501)
-  val HTTP_STATUS_502 = Value(502)
-  val HTTP_STATUS_503 = Value(503)
-  val HTTP_STATUS_504 = Value(504)
+object HttpStatus {
+  sealed trait HttpStatusType {
+    val status: Int
+  }
+  case class HTTP_STATUS(val status: Int) extends HttpStatusType
+  case object HTTP_STATUS_429 extends HTTP_STATUS(429)
+  case object HTTP_STATUS_499 extends HTTP_STATUS(499)
+  case object HTTP_STATUS_500 extends HTTP_STATUS(500)
+  case object HTTP_STATUS_501 extends HTTP_STATUS(501)
+  case object HTTP_STATUS_502 extends HTTP_STATUS(502)
+  case object HTTP_STATUS_503 extends HTTP_STATUS(503)
+  case object HTTP_STATUS_504 extends HTTP_STATUS(504)
 }
 
 object HttpStatusThresholdProtocol extends DefaultJsonProtocol {
