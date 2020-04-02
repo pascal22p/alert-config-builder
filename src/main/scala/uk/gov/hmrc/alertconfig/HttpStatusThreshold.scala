@@ -15,31 +15,29 @@
  */
 
 package uk.gov.hmrc.alertconfig
-
-import spray.json.DefaultJsonProtocol
-import uk.gov.hmrc.alertconfig.HttpStatus.HttpStatusType
+import spray.json.{DefaultJsonProtocol, JsNumber, JsValue, JsonFormat}
 import uk.gov.hmrc.alertconfig.AlertSeverity.AlertSeverityType
+import uk.gov.hmrc.alertconfig.HttpStatus.HTTP_STATUS
 
-
-case class HttpStatusThreshold(httpStatus: HttpStatusType, count: Int = 1, severity: AlertSeverityType = AlertSeverity.critical)
+case class HttpStatusThreshold(httpStatus: HTTP_STATUS, count: Int = 1, severity: AlertSeverityType = AlertSeverity.critical)
 
 object HttpStatus {
-  sealed trait HttpStatusType {
-    val status: Int
-  }
-  case class HTTP_STATUS(val status: Int) extends HttpStatusType
-  case object HTTP_STATUS_429 extends HTTP_STATUS(429)
-  case object HTTP_STATUS_499 extends HTTP_STATUS(499)
-  case object HTTP_STATUS_500 extends HTTP_STATUS(500)
-  case object HTTP_STATUS_501 extends HTTP_STATUS(501)
-  case object HTTP_STATUS_502 extends HTTP_STATUS(502)
-  case object HTTP_STATUS_503 extends HTTP_STATUS(503)
-  case object HTTP_STATUS_504 extends HTTP_STATUS(504)
+  case class HTTP_STATUS(status: Int)
+  val HTTP_STATUS_429: HTTP_STATUS = HTTP_STATUS(429)
+  val HTTP_STATUS_499: HTTP_STATUS = HTTP_STATUS(499)
+  val HTTP_STATUS_500: HTTP_STATUS = HTTP_STATUS(500)
+  val HTTP_STATUS_501: HTTP_STATUS = HTTP_STATUS(501)
+  val HTTP_STATUS_502: HTTP_STATUS = HTTP_STATUS(502)
+  val HTTP_STATUS_503: HTTP_STATUS = HTTP_STATUS(503)
+  val HTTP_STATUS_504: HTTP_STATUS = HTTP_STATUS(504)
 }
 
 object HttpStatusThresholdProtocol extends DefaultJsonProtocol {
 
-  implicit val httpStatusFormat = jsonHttpStatusEnum(HttpStatus)
+  implicit object httpStatusFormat extends JsonFormat[HTTP_STATUS] {
+    override def read(json: JsValue): HTTP_STATUS = HTTP_STATUS(IntJsonFormat.read(json))
+    override def write(obj: HTTP_STATUS): JsValue = JsNumber(obj.status)
+  }
 
   implicit val severityFormat = jsonSeverityEnum(AlertSeverity)
 
