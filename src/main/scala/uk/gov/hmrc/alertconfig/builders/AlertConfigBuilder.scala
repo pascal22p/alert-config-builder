@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,8 @@ case class AlertConfigBuilder(serviceName: String,
                               containerKillThreshold: Int = 1,
                               httpStatusThresholds: Seq[HttpStatusThreshold] = Nil,
                               logMessageThresholds: Seq[LogMessageThreshold] = Nil,
-                              totalHttpRequestThreshold: Int = Int.MaxValue
+                              totalHttpRequestThreshold: Int = Int.MaxValue,
+                              averageCPUThreshold: Int = Int.MaxValue
                              ) extends Builder[Option[String]] {
 
   import spray.json._
@@ -58,6 +59,8 @@ case class AlertConfigBuilder(serviceName: String,
   def withContainerKillThreshold(containerCrashThreshold: Int) = this.copy(containerKillThreshold = containerCrashThreshold)
 
   def withLogMessageThreshold(message: String, threshold: Int) = this.copy(logMessageThresholds = logMessageThresholds :+ LogMessageThreshold(message, threshold))
+
+  def withAverageCPUThreshold(averageCPUThreshold: Int) = this.copy(averageCPUThreshold = averageCPUThreshold)
 
   def build: Option[String] = {
     import uk.gov.hmrc.alertconfig.HttpStatusThresholdProtocol._
@@ -93,7 +96,8 @@ case class AlertConfigBuilder(serviceName: String,
              |"containerKillThreshold" : $containerKillThreshold,
              |"httpStatusThresholds" : ${httpStatusThresholds.toJson.compactPrint},
              |"total-http-request-threshold": $totalHttpRequestThreshold,
-             |"log-message-thresholds" : $buildLogMessageThresholdsJson
+             |"log-message-thresholds" : $buildLogMessageThresholdsJson,
+             |"average-cpu-threshold" : $averageCPUThreshold
              |}
               """.stripMargin
         )
@@ -132,7 +136,8 @@ case class TeamAlertConfigBuilder(
                                    containerKillThreshold: Int = 1,
                                    httpStatusThresholds: Seq[HttpStatusThreshold] = Nil,
                                    logMessageThresholds: Seq[LogMessageThreshold] = Nil,
-                                   totalHttpRequestThreshold: Int = Int.MaxValue
+                                   totalHttpRequestThreshold: Int = Int.MaxValue,
+                                   averageCPUThreshold: Int = Int.MaxValue
                                  ) extends Builder[Seq[AlertConfigBuilder]] {
 
   def withHandlers(handlers: String*) = this.copy(handlers = handlers)
@@ -151,8 +156,10 @@ case class TeamAlertConfigBuilder(
 
   def withLogMessageThreshold(message: String, threshold: Int) = this.copy(logMessageThresholds = logMessageThresholds :+ LogMessageThreshold(message, threshold))
 
+  def withAverageCPUThreshold(averageCPUThreshold: Int) = this.copy(averageCPUThreshold = averageCPUThreshold)
+
   override def build: Seq[AlertConfigBuilder] = services.map(service =>
-    AlertConfigBuilder(service, handlers, exceptionThreshold, http5xxThreshold, http5xxPercentThreshold, containerKillThreshold, httpStatusThresholds, logMessageThresholds, totalHttpRequestThreshold)
+    AlertConfigBuilder(service, handlers, exceptionThreshold, http5xxThreshold, http5xxPercentThreshold, containerKillThreshold, httpStatusThresholds, logMessageThresholds, totalHttpRequestThreshold, averageCPUThreshold)
   )
 }
 

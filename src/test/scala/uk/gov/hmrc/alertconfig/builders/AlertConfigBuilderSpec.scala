@@ -1,5 +1,5 @@
 /*
- * Copyright 2019 HM Revenue & Customs
+ * Copyright 2020 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
       config("5xx-percent-threshold") shouldBe JsNumber(100)
       config("total-http-request-threshold") shouldBe JsNumber(Int.MaxValue)
       config("containerKillThreshold") shouldBe JsNumber(56)
+      config("average-cpu-threshold") shouldBe JsNumber(Int.MaxValue)
 
     }
 
