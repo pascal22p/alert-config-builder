@@ -31,15 +31,15 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
   }
 
   "AlertConfigBuilder" should {
-    "build correct config" in  {
+    "build correct config" in {
 
-      val config = AlertConfigBuilder("service1", handlers = Seq("h1","h2"))
+      val config = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))
         .withContainerKillThreshold(56).build.get.parseJson.asJsObject.fields
 
       config("app") shouldBe JsString("service1.domain.zone.1")
       config("handlers") shouldBe JsArray(JsString("h1"), JsString("h2"))
       config("exception-threshold") shouldBe JsNumber(2)
-      config("5xx-threshold") shouldBe JsObject("count" -> JsNumber(Int.MaxValue),"severity" -> JsString("critical"))
+      config("5xx-threshold") shouldBe JsObject("count" -> JsNumber(Int.MaxValue), "severity" -> JsString("critical"))
       config("5xx-percent-threshold") shouldBe JsNumber(100)
       config("total-http-request-threshold") shouldBe JsNumber(Int.MaxValue)
       config("containerKillThreshold") shouldBe JsNumber(56)
@@ -50,25 +50,25 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
       System.setProperty("app-config-path", "this-directory-does-not-exist")
 
       intercept[FileNotFoundException] {
-        val config = AlertConfigBuilder("service1", handlers = Seq("h1","h2")).build.get.parseJson.asJsObject.fields
+        AlertConfigBuilder("service1", handlers = Seq("h1", "h2")).build.get.parseJson.asJsObject.fields
       }
     }
 
     "Returns None when app config file not found" in {
-        AlertConfigBuilder("absent-service", handlers = Seq("h1","h2")).build shouldBe None
+      AlertConfigBuilder("absent-service", handlers = Seq("h1", "h2")).build shouldBe None
     }
 
     "Returns None when app config file exists but zone key is absent" in {
-      AlertConfigBuilder("service-with-absent-zone-key", handlers = Seq("h1","h2")).build shouldBe None
+      AlertConfigBuilder("service-with-absent-zone-key", handlers = Seq("h1", "h2")).build shouldBe None
     }
 
     "Returns None when app config file exists but it unparsable" in {
-      AlertConfigBuilder("service-with-unparseable-app-config", handlers = Seq("h1","h2")).build shouldBe None
+      AlertConfigBuilder("service-with-unparseable-app-config", handlers = Seq("h1", "h2")).build shouldBe None
     }
 
     "Maps the correct service domain" in {
-      val service2Config = AlertConfigBuilder("service2", handlers = Seq("h1","h2")).build.get.parseJson.asJsObject.fields
-      val service3Config = AlertConfigBuilder("service3", handlers = Seq("h1","h2")).build.get.parseJson.asJsObject.fields
+      val service2Config = AlertConfigBuilder("service2", handlers = Seq("h1", "h2")).build.get.parseJson.asJsObject.fields
+      val service3Config = AlertConfigBuilder("service3", handlers = Seq("h1", "h2")).build.get.parseJson.asJsObject.fields
       service2Config("app") shouldBe JsString("service2.domain.zone.2")
       service3Config("app") shouldBe JsString("service3.domain.zone.3")
     }
@@ -93,9 +93,19 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
         .withHttpStatusThreshold(HttpStatusThreshold(HTTP_STATUS_504, 4)).build.get.parseJson.asJsObject.fields
 
       serviceConfig("httpStatusThresholds") shouldBe JsArray(
-        JsObject("httpStatus" -> JsNumber(502),"count" ->  JsNumber(2), "severity" -> JsString("warning")),
-        JsObject("httpStatus" -> JsNumber(503),"count" ->  JsNumber(3), "severity" -> JsString("error")),
-        JsObject("httpStatus" -> JsNumber(504),"count" ->  JsNumber(4), "severity" -> JsString("critical"))
+        JsObject("httpStatus" -> JsNumber(502), "count" -> JsNumber(2), "severity" -> JsString("warning")),
+        JsObject("httpStatus" -> JsNumber(503), "count" -> JsNumber(3), "severity" -> JsString("error")),
+        JsObject("httpStatus" -> JsNumber(504), "count" -> JsNumber(4), "severity" -> JsString("critical"))
+      )
+    }
+
+    "build/configure http status threshold with given generic threshold" in {
+
+      val serviceConfig = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))
+        .withHttpStatusThreshold(HttpStatusThreshold(HTTP_STATUS(404))).build.get.parseJson.asJsObject.fields
+
+      serviceConfig("httpStatusThresholds") shouldBe JsArray(
+        JsObject("httpStatus" -> JsNumber(404), "count" -> JsNumber(1), "severity" -> JsString("critical"))
       )
     }
 
@@ -104,7 +114,7 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
       val serviceConfig: Map[String, JsValue] = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))
         .withHttp5xxThreshold(2, AlertSeverity.warning).build.get.parseJson.asJsObject.fields
 
-      serviceConfig("5xx-threshold") shouldBe JsObject("count" ->  JsNumber(2), "severity" -> JsString("warning"))
+      serviceConfig("5xx-threshold") shouldBe JsObject("count" -> JsNumber(2), "severity" -> JsString("warning"))
     }
 
     "build/configure http 5xx threshold severity with given thresholds and unspecified severity" in {
@@ -112,21 +122,21 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
       val serviceConfig: Map[String, JsValue] = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))
         .withHttp5xxThreshold(2).build.get.parseJson.asJsObject.fields
 
-      serviceConfig("5xx-threshold") shouldBe JsObject("count" ->  JsNumber(2), "severity" -> JsString("critical"))
+      serviceConfig("5xx-threshold") shouldBe JsObject("count" -> JsNumber(2), "severity" -> JsString("critical"))
     }
 
 
     "build/configure logMessageThresholds with given thresholds" in {
 
       val serviceConfig = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))
-          .withLogMessageThreshold("SIMUATED_ERROR1" , 3)
-          .withLogMessageThreshold("SIMUATED_ERROR2" , 4)
-          .withLogMessageThreshold("SIMUATED_ERROR3" , 5).build.get.parseJson.asJsObject.fields
+        .withLogMessageThreshold("SIMUATED_ERROR1", 3)
+        .withLogMessageThreshold("SIMUATED_ERROR2", 4)
+        .withLogMessageThreshold("SIMUATED_ERROR3", 5).build.get.parseJson.asJsObject.fields
 
       serviceConfig("log-message-thresholds") shouldBe JsArray(
-        JsObject("message" -> JsString("SIMUATED_ERROR1"),"count" ->  JsNumber(3)),
-        JsObject("message" -> JsString("SIMUATED_ERROR2"),"count" ->  JsNumber(4)),
-        JsObject("message" -> JsString("SIMUATED_ERROR3"),"count" ->  JsNumber(5))
+        JsObject("message" -> JsString("SIMUATED_ERROR1"), "count" -> JsNumber(3)),
+        JsObject("message" -> JsString("SIMUATED_ERROR2"), "count" -> JsNumber(4)),
+        JsObject("message" -> JsString("SIMUATED_ERROR3"), "count" -> JsNumber(5))
       )
     }
 
