@@ -20,15 +20,6 @@ import spray.json.{DeserializationException, JsNumber, JsString, JsValue, JsonFo
 
 package object alertconfig {
 
-  def jsonHttpStatusEnum(enu: HttpStatus.type) = new JsonFormat[HttpStatus.HTTP_STATUS] {
-    def write(obj: HttpStatus.HTTP_STATUS) = JsNumber(obj.status)
-
-    def read(json: JsValue) = json match {
-      case JsNumber(num) => HttpStatus.HTTP_STATUS(num.toInt)
-      case something => throw DeserializationException(s"Expected a value from enum $enu instead of $something")
-    }
-  }
-
   def jsonSeverityEnum(enu: AlertSeverity.type) = new JsonFormat[AlertSeverity.Value] {
     def write(obj: AlertSeverity.AlertSeverityType) = JsString(obj.toString)
 
