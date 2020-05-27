@@ -43,6 +43,7 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
       config("5xx-percent-threshold") shouldBe JsNumber(100)
       config("total-http-request-threshold") shouldBe JsNumber(Int.MaxValue)
       config("containerKillThreshold") shouldBe JsNumber(56)
+      config("average-cpu-threshold") shouldBe JsNumber(Int.MaxValue)
 
     }
 

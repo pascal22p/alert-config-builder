@@ -41,6 +41,7 @@ class TeamAlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAf
       alertConfigBuilder.totalHttpRequestThreshold shouldBe Int.MaxValue
       alertConfigBuilder.exceptionThreshold shouldBe 2
       alertConfigBuilder.containerKillThreshold shouldBe 1
+      alertConfigBuilder.averageCPUThreshold shouldBe Int.MaxValue
     }
 
     "return TeamAlertConfigBuilder with correct http5xxThresholdSeverities" in {
