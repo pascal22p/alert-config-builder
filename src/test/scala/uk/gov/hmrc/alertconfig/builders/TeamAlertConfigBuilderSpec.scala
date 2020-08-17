@@ -159,6 +159,27 @@ class TeamAlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAf
     }
 
 
+    "return TeamAlertConfigBuilder for platform services with correct containerKillThresholds" in {
+
+      val alertConfigBuilder = TeamAlertConfigBuilder.teamAlerts(Seq("ingress-gateway-public", "ingress-gateway-public-rate"))
+        .isPlatformService(true)
+        .withContainerKillThreshold(1)
+
+
+      alertConfigBuilder.services shouldBe Seq("ingress-gateway-public", "ingress-gateway-public-rate")
+      val configs = alertConfigBuilder.build.map(_.build.get.parseJson.asJsObject.fields)
+
+      configs.size shouldBe 2
+      val service1Config = configs(0)
+      val service2Config = configs(1)
+
+      service1Config("app") shouldBe JsString("ingress-gateway-public.")
+      service1Config("containerKillThreshold") shouldBe JsNumber(1)
+      service2Config("app") shouldBe JsString("ingress-gateway-public-rate.")
+      service2Config("containerKillThreshold") shouldBe JsNumber(1)
+    }
+
+
     "throw exception if no service provided" in {
 
       an [RuntimeException] should be thrownBy TeamAlertConfigBuilder.teamAlerts(Seq())
