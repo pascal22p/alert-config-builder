@@ -1,7 +1,7 @@
 
 # alert-config-builder
 
-[![Build Status](https://travis-ci.org/hmrc/alert-config-builder.svg?branch=master)](https://travis-ci.org/hmrc/alert-config-builder) [ ![Download](https://api.bintray.com/packages/hmrc/releases/alert-config-builder/images/download.svg) ](https://bintray.com/hmrc/releases/alert-config-builder/_latestVersion)
+[ ![Download](https://api.bintray.com/packages/hmrc/releases/alert-config-builder/images/download.svg) ](https://bintray.com/hmrc/releases/alert-config-builder/_latestVersion)
 
 `alert-config-builder` is a Scala utility which, given an alert specification for a number of services, generates and emits JSON alert configuration documents for those services, suitable for indexing in Elasticsearch.
 
