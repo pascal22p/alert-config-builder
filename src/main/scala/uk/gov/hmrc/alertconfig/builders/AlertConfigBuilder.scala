@@ -104,7 +104,7 @@ case class AlertConfigBuilder(serviceName: String,
              |"total-http-request-threshold": $totalHttpRequestThreshold,
              |"log-message-thresholds" : $buildLogMessageThresholdsJson,
              |"average-cpu-threshold" : $averageCPUThreshold,
-             |"absolute-percentage-split-threshold" : ${httpAbsolutePercentSplitThreshold.toJson(HttpAbsolutePercentSplitThresholdProtocol.thresholdFormat).compactPrint}
+             |"absolute-percentage-split-threshold" : ${httpAbsolutePercentSplitThreshold.toJson(seqFormat(HttpAbsolutePercentSplitThresholdProtocol.thresholdFormat)).compactPrint}
              |}
               """.stripMargin
         )
