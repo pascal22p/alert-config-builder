@@ -24,7 +24,7 @@ case class HttpAbsolutePercentSplitThreshold(percentThreshold: Int = Int.MaxValu
                                              absoluteThreshold: Int = Int.MaxValue,
                                              hysteresis: Double = 1.0,
                                              excludeSpikes: Int = 0,
-                                             ErrorFilter: String = "status:>498",
+                                             errorFilter: String = "status:>498",
                                              severity: AlertSeverityType = AlertSeverity.critical)
 
 object HttpAbsolutePercentSplitThresholdProtocol extends DefaultJsonProtocol {

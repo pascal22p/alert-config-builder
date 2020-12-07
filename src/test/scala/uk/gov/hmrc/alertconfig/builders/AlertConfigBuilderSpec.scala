@@ -164,7 +164,7 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
       val serviceConfig: Map[String, JsValue] = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))
         .withHttpAbsolutePercentSplitThreshold(HttpAbsolutePercentSplitThreshold()).build.get.parseJson.asJsObject.fields
 
-      val expected = JsArray(JsObject("ErrorFilter" -> JsString("status:>498"),
+      val expected = JsArray(JsObject("errorFilter" -> JsString("status:>498"),
         "absoluteThreshold" -> JsNumber(Int.MaxValue),
         "crossOver" -> JsNumber(0),
         "excludeSpikes" -> JsNumber(0),
@@ -189,7 +189,7 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
       .withHttpAbsolutePercentSplitThreshold(HttpAbsolutePercentSplitThreshold(
         percent, crossOver, absolute, hysteresis, excludeSpikes, filter, severity)).build.get.parseJson.asJsObject.fields
 
-    val expected = JsArray(JsObject("ErrorFilter" -> JsString(filter),
+    val expected = JsArray(JsObject("errorFilter" -> JsString(filter),
       "absoluteThreshold" -> JsNumber(absolute),
       "crossOver" -> JsNumber(crossOver),
       "excludeSpikes" -> JsNumber(excludeSpikes),
