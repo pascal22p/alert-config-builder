@@ -163,7 +163,7 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
         "crossOver" -> JsNumber(0),
         "excludeSpikes" -> JsNumber(0),
         "hysteresis" -> JsNumber(1.0),
-        "percentThreshold" -> JsNumber(Int.MaxValue),
+        "percentThreshold" -> JsNumber(100.0),
         "severity" -> JsString("critical")))
 
       serviceConfig("absolute-percentage-split-threshold") shouldBe expected
@@ -171,7 +171,7 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
   }
 
   "build/configure HttpAbsolutePercentSplitThreshold with required parameters" in {
-    val percent = 10
+    val percent = 10.2
     val crossOver = 20
     val absolute = 30
     val hysteresis = 1.2
@@ -212,7 +212,7 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
   }
 
   "build/configure http5xxPercentThreshold with required parameters" in {
-    val threshold = 13
+    val threshold = 13.3
     val serviceConfig: Map[String, JsValue] = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))
       .withHttp5xxPercentThreshold(threshold).build.get.parseJson.asJsObject.fields
 

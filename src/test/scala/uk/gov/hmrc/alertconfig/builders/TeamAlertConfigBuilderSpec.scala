@@ -56,7 +56,7 @@ class TeamAlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAf
     }
 
     "return TeamAlertConfigBuilder with correct AbsolutePercentSplitThresholds" in {
-      val percent = 15
+      val percent = 15.5
       val crossover = 50
       val absolute = 20
       val hysteresis = 1.2
@@ -87,7 +87,7 @@ class TeamAlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAf
     }
 
     "return TeamAlertConfigBuilder with correct Http5xxPercentThreshold" in {
-      val threshold = 19
+      val threshold = 19.9
       val alertConfigBuilder = TeamAlertConfigBuilder.teamAlerts(Seq("service1", "service2"))
         .withHttp5xxPercentThreshold(threshold)
 
