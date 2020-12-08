@@ -21,7 +21,7 @@ import java.io.FileNotFoundException
 import org.scalatest._
 import spray.json._
 import uk.gov.hmrc.alertconfig.HttpStatus._
-import uk.gov.hmrc.alertconfig.{HttpStatusThreshold, AlertSeverity}
+import uk.gov.hmrc.alertconfig.{AlertSeverity, HttpAbsolutePercentSplitThreshold, HttpStatusThreshold}
 
 class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterEach {
 
@@ -158,5 +158,45 @@ class AlertConfigBuilderSpec extends WordSpec with Matchers with BeforeAndAfterE
 
       serviceConfig("httpStatusThresholds") shouldBe JsArray()
     }
+
+    "build/configure HttpAbsolutePercentSplitThreshold with default parameters" in {
+
+      val serviceConfig: Map[String, JsValue] = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))
+        .withHttpAbsolutePercentSplitThreshold(HttpAbsolutePercentSplitThreshold()).build.get.parseJson.asJsObject.fields
+
+      val expected = JsArray(JsObject("errorFilter" -> JsString("status:>498"),
+        "absoluteThreshold" -> JsNumber(Int.MaxValue),
+        "crossOver" -> JsNumber(0),
+        "excludeSpikes" -> JsNumber(0),
+        "hysteresis" -> JsNumber(1.0),
+        "percentThreshold" -> JsNumber(Int.MaxValue),
+        "severity" -> JsString("critical")))
+
+      serviceConfig("absolute-percentage-split-threshold") shouldBe expected
+    }
+  }
+
+  "build/configure HttpAbsolutePercentSplitThreshold with required parameters" in {
+    val percent = 10
+    val crossOver = 20
+    val absolute = 30
+    val hysteresis = 1.2
+    val excludeSpikes = 2
+    val filter = "Some error"
+    val severity = AlertSeverity.warning
+
+    val serviceConfig: Map[String, JsValue] = AlertConfigBuilder("service1", handlers = Seq("h1", "h2"))
+      .withHttpAbsolutePercentSplitThreshold(HttpAbsolutePercentSplitThreshold(
+        percent, crossOver, absolute, hysteresis, excludeSpikes, filter, severity)).build.get.parseJson.asJsObject.fields
+
+    val expected = JsArray(JsObject("errorFilter" -> JsString(filter),
+      "absoluteThreshold" -> JsNumber(absolute),
+      "crossOver" -> JsNumber(crossOver),
+      "excludeSpikes" -> JsNumber(excludeSpikes),
+      "hysteresis" -> JsNumber(hysteresis),
+      "percentThreshold" -> JsNumber(percent),
+      "severity" -> JsString(severity.toString)))
+
+    serviceConfig("absolute-percentage-split-threshold") shouldBe expected
   }
 }
